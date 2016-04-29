@@ -34,7 +34,9 @@ Folgende Dateien und Ordner sind von Relevanz (mit diesen arbeiten):
 Alle anderen können so belassen werden wie sie sind.
 
 ## Installation
-Installiere NodeJS (npm wird davon nacher benötigt):
+Installiere NodeJS LTS Version (npm wird davon nacher benötigt):
+
+[https://nodejs.org/en/](NodeJS)
 
 Installiere Grunt/Yeoman/Bower:
 
