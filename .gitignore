@@ -1,1 +1,13 @@
+/* General IDE ignores */
 .idea/*
+
+/* Client ignores from .npmignore */
+temp/
+dist/
+node_modules/
+bower_components/
+_SpecRunner.html
+.DS_Store
+test-results.xml
+
+/* Server ignores */
