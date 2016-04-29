@@ -5,6 +5,7 @@ Irina Terribilini, Lukas Willin, Emil Sturzenegger
 
 ## Inhalt
 * Informationen
+    * Relevante Dateien/Ordner
 * Installation
 * Grunt Tasks
 * Yeoman Subgenerators
@@ -18,6 +19,19 @@ Irina Terribilini, Lukas Willin, Emil Sturzenegger
 Als Referenz gelten grundsätzlich folgende Links:
 
 * [https://github.com/cgross/generator-cg-angular](Generator)
+
+### Relevante Dateien/Ordner
+Folgende Dateien und Ordner sind von Relevanz (mit diesen arbeiten):
+
+* client
+    * modules (Hier werden alle Dateien hinein generiert)
+    * app.js
+    * app.less
+    * index.html
+* .gitignore
+* README.md
+
+Alle anderen können so belassen werden wie sie sind.
 
 ## Installation
 Installiere NodeJS (npm wird davon nacher benötigt):
@@ -39,14 +53,14 @@ Installiere alle Komponenten (Wechsle zuerst in den geklonten Projekt Ordner):
 ## Grunt Tasks
 Grunt ist ein Entwicklungs Tool zum Testen und Builden von Projekten.
 
-    grunt serve     #Startet einen Entwicklungsserver. Bentutzt diesen um einfach auszuporobieren
+    grunt serve     #Startet einen Entwicklungsserver. Benutzt diesen um einfach auszuporobieren
     grunt test      #Startet alle Unit tests
     grunt build     #Erstellt ein voll optimierten Ordner /dist für die Produktion
 
 Wenn ```grunt serve``` gestartet wird, werden sämtliche Änderungen am Code live im Browser angezeigt.
 
 ## Yeoman Subgenerators
-Yeoman ist ein Komplex aus verschiedenen Tools zusammen. Es generiert Basic Dateien und erleichtert so die Arbeit. Zudem kann man so die Projektstruktur sauber halten.
+Yeoman ist ein Komplex aus verschiedenen Tools zusammen. Es generiert Standart Dateien und erleichtert so die Arbeit. Zudem kann man so die Projektstruktur sauber halten.
 Folgende Befehle sind hier zur Verfügung:
 
     yo cg-angular:directive my-awesome-directive    # Mit diesem kann man eigene Attribute/Elemente erstellen
