@@ -6,6 +6,10 @@ angular.module('app').config(function($stateProvider, $urlRouterProvider) {
         url: '/dashboard',
         templateUrl: 'modules/dashboard/dashboard.html'
     });
+    $stateProvider.state('anbieten', {
+        url: '/anbieten',
+        templateUrl: 'modules/anbieten/anbieten.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/dashboard');
 
