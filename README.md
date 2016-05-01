@@ -23,11 +23,11 @@ Als Referenz gelten grundsätzlich folgende Links:
 ### Relevante Dateien/Ordner
 Folgende Dateien und Ordner sind von Relevanz (mit diesen arbeiten):
 
-* client
-    * modules (Hier werden alle Dateien hinein generiert)
-    * app.js
-    * app.less
-    * index.html
+* api/index.php (In diesem Ordner sollte nur diese Datei sein)
+* modules (Hier werden alle Dateien hinein generiert)
+* app.js
+* app.less
+* index.html
 * .gitignore
 * README.md
 
@@ -42,7 +42,7 @@ Installiere Grunt/Yeoman/Bower:
 
     npm install -g grunt-cli yo bower
 
-Installiere den Angular Generator: 
+Installiere den Angular Generator:
 
     npm install -g generator-cg-angular
 
@@ -105,10 +105,10 @@ Somit müssen Styles nicht mühselig einzeln angepasst werden.
 
 Bsp.: Mann will eine Farbpalette für die Applikation erstellen.
 Definiert im app.less (global) und somit geltend für alle anderen Vorkomnisse von .less Dateien:
-    
+
     @dark-stelper-red: #990000
     @light-stelper-red: #ff8080
-    
+
 Nutzung in einer .less Datei:
 
     .meine-klasse {
