@@ -1,7 +1,20 @@
-angular.module('app', ['ui.bootstrap','ui.router','ngAnimate']);
+angular.module('app', ['ui.bootstrap','ui.router','ngAnimate', 'ngStorage']);
+
+angular.module('app').constant('urls', {
+    BASE: 'http://localhost',
+    BASE_API: 'http://localhost/api'
+});
 
 angular.module('app').config(function($stateProvider, $urlRouterProvider) {
 
+    $stateProvider.state('signin', {
+        url: '/',
+        templateUrl: 'modules/dashboard/signin.html'
+    });
+    $stateProvider.state('signup', {
+        url: '/signup',
+        templateUrl: 'modules/dashboard/signup.html'
+    });
     $stateProvider.state('dashboard', {
         url: '/dashboard',
         templateUrl: 'modules/dashboard/dashboard.html'
@@ -11,7 +24,7 @@ angular.module('app').config(function($stateProvider, $urlRouterProvider) {
         templateUrl: 'modules/anbieten/anbieten.html'
     });
     /* Add New States Above */
-    $urlRouterProvider.otherwise('/dashboard');
+    $urlRouterProvider.otherwise('/');
 
 });
 

@@ -93,7 +93,7 @@ Beim hinzufügen einer Bower Bibliothek muss ein \<script\> und wenn benötigt e
 Die zu verlinkenden Dateien sind im Ordner bower_components zu finden.
 
 ### Npm
-Befehl: ```npm install <package-name>```
+Befehl: ```npm install <package-name> --save```
 
 Suche nach Bibliotheken: [Npm Bibliothek](https://www.npmjs.com/)
 
