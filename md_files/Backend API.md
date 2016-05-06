@@ -94,10 +94,9 @@ Die html response codes können hier nachgesehen werden:
 				user: {
 					type: object,
 					content: {
-						name: { type = string },
+						lastname: { type = string },
 						firstname: { type = string },
 						email: { type = string },
-						telefon: { type = number },
 						password: { type = string }
 					}
 				}
@@ -175,33 +174,6 @@ Die html response codes können hier nachgesehen werden:
 
 ---
 
-#### messages by user-id
-
-	/messages/{userId}
-		get: get all messages for specified user
-			responses: [ 
-				200: {
-					messages: [
-						type = array,
-						#message
-					]
-				},
-				#unauthorized401,
-				#insufficientrights401,
-				#idrequired400,
-			]
-		post:
-			parameters: [
-				#message
-			]
-			responses: [ 
-				201: OK,
-				#idrequired400,
-				#idunvalid400
-			]
-
----
-
 #### categories
 
 	/categories/{userId}
@@ -253,12 +225,6 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 			place: { type = string },
 			email: { type = string },
 			telefon: { type = number },
-			messages: [
-				type = array,
-				content: {
-					#message
-				}
-			],
 			lessons: [
 				type = array,
 				content: {
@@ -273,35 +239,7 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 	lesson: {
 		type = object,
 		content: {
-			category: { type = string},
-			description { type = string },
-			reviews: [
-				type = array,
-				content: {
-					#review
-				}
-			]
-		}
-	}
-
-#### message
-
-	message: {
-		type = object,
-		content: {
-			date: { type = date },
-			text: { type = string }
-		}
-	}
-	
-#### review
-
-	review: {
-		type = object,
-		content: {
-			date: { type = date },
-			text: { type = string },
-			rating: { type = number }
+			category: { type = string}
 		}
 	}
 	
