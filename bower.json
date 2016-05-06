@@ -21,6 +21,8 @@
     "moment": "~2.12",
     "less.js": "~2.6",
     "font-awesome": "~4.5",
-    "ngstorage": "^0.3.10"
+    "a0-angular-storage": "^0.0.15",
+    "angular-jwt": "^0.0.9",
+    "angular-google-maps": "^2.3.2"
   }
 }
