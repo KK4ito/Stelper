@@ -1,52 +1,23 @@
-angular.module('app').controller('HomeCtrl',function($scope, $log, $timeout){
+angular.module('app').controller('HomeCtrl',function($scope, helperService){
 
-
-    $scope.map = {center: {latitude: 40.1451, longitude: -99.6680 }, zoom: 4 };
-    $scope.map = {center: {latitude: 40.1451, longitude: -99.6680 }, zoom: 4 };
-    $scope.options = {scrollwheel: false};
-    $scope.coordsUpdates = 0;
-    $scope.dynamicMoveCtr = 0;
-    $scope.marker = {
-        id: 0,
-        coords: {
-            latitude: 40.1451,
-            longitude: -99.6680
+    helperService.getCurrentPosition().then(
+        function (data) {
+            // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
+            console.log(data.coords.latitude);
+            $scope.setMap(data.coords.latitude, data.coords.longitude);
+            console.log(data);
         },
-        options: { draggable: true },
-        events: {
-            dragend: function (marker, eventName, args) {
-                $log.log('marker dragend');
-                var lat = marker.getPosition().lat();
-                var lon = marker.getPosition().lng();
-                $log.log(lat);
-                $log.log(lon);
-
-                $scope.marker.options = {
-                    draggable: true,
-                    labelContent: "lat: " + $scope.marker.coords.latitude + ' ' + 'lon: ' + $scope.marker.coords.longitude,
-                    labelAnchor: "100 0",
-                    labelClass: "marker-labels"
-                };
-            }
+        function (data) {
+            // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
+            // Default Center and TODO: Show Error Message
+            $scope.setMap(47, 8);
+            console.log(data);
         }
+    );
+
+    $scope.setMap = function (lat, lon) {
+        $scope.map = {center: {latitude: $scope.position.latitude, longitude: $scope.position.longitude }, zoom: 14 };
+        $scope.options = {scrollwheel: false};
     };
-    $scope.$watchCollection("marker.coords", function (newVal, oldVal) {
-        if (_.isEqual(newVal, oldVal))
-            return;
-        $scope.coordsUpdates++;
-    });
-    $timeout(function () {
-        $scope.marker.coords = {
-            latitude: 42.1451,
-            longitude: -100.6680
-        };
-        $scope.dynamicMoveCtr++;
-        $timeout(function () {
-            $scope.marker.coords = {
-                latitude: 43.1451,
-                longitude: -102.6680
-            };
-            $scope.dynamicMoveCtr++;
-        }, 2000);
-    }, 1000);
+
 });
