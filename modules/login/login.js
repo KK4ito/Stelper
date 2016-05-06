@@ -5,12 +5,13 @@ angular.module('app').controller('LoginCtrl', function($scope, $http, store, $st
     $scope.login = function() {
         apiService.login(
             $scope.user,
-            function(success) {
-                store.set('jwt', success.data.id_token);
+            function(data, status) {
+                store.set('token', data.token);
+                //store.set('userId', data.userId); TODO: not implemented yet on server side
                 $state.go('home');
             },
-            function(error) {
-                window.alert(error.data);
+            function(data, status) {
+                window.alert("Message: "+data+"/n Status: "+status);
             });
     };
 

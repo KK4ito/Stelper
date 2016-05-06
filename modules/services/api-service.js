@@ -1,8 +1,8 @@
-angular.module('app').service('apiService',['$http', function($http, $rootScope) {
+angular.module('app').service('apiService',['$http', function($http) {
 
     // CONSTANTS
-    var BASE = 'http://45.62.250.139/';
-    var BASE_API = 'http://45.62.250.139/api';
+    var BASE = 'http://45.62.253.219/';
+    var BASE_API = 'http://45.62.253.219/api';
 
     // EXTERNAL METHODS
 
@@ -17,6 +17,12 @@ angular.module('app').service('apiService',['$http', function($http, $rootScope)
         $http.post(
             BASE_API + '/login',
             data
+        ).success(success).error(error);
+    };
+
+    this.test = function (success, error) {
+        $http.get(
+            BASE_API + '/test'
         ).success(success).error(error);
     };
 

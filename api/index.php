@@ -1,4 +1,7 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
 use Firebase\JWT\JWT;
 
 require '../../vendor/autoload.php';
@@ -11,9 +14,8 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
 
-$app->post("/register", "login");
+$app->post("/login", "login");
 $app->get("/test", "test");
-$app->get("/users", "getUsers");
 
 $app->run();
 
@@ -26,7 +28,9 @@ function login($request, $response, $arguments) {
 }
 
 function test($request, $response, $arguments) {
-
+    return $response->withStatus(201)
+        ->withHeader("Content-Type", "text/html")
+        ->write("Hello");
 }
 
 function generateToken($request) {

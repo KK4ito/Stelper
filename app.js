@@ -7,7 +7,7 @@ angular.module('app', [
     'uiGmapgoogle-maps'
 ]);
 
-angular.module('app').config(function($httpProvider, $urlRouterProvider, jwtInterceptorProvider, $stateProvider, uiGmapGoogleMapApiProvider) {
+angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateProvider, jwtInterceptorProvider, uiGmapGoogleMapApiProvider) {
 
     $stateProvider.state('home', {
         url: '/home',
@@ -20,12 +20,13 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, jwtInte
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
+    // Add Token to every request made
     jwtInterceptorProvider.tokenGetter = function(store) {
-        return store.get('jwt');
+        return store.get('token');
     };
-
     $httpProvider.interceptors.push('jwtInterceptor');
 
+    // Configure the google maps
     uiGmapGoogleMapApiProvider.configure({
         //    key: 'your api key',
         v: '3.20', //defaults to latest 3.X anyhow
@@ -33,16 +34,7 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, jwtInte
     });
 });
 
-angular.module('app').run(function($rootScope, $state, store, jwtHelper) {
-
-    $rootScope.$on('$stateChangeStart', function(e, to) {
-        if (to.data && to.data.requiresLogin) {
-            if (!store.get('jwt') || jwtHelper.isTokenExpired(store.get('jwt'))) {
-                e.preventDefault();
-                $state.go('login');
-            }
-        }
-    });
+angular.module('app').run(function($rootScope) {
 
     /*
     For custom functions or pure javascript functions,
