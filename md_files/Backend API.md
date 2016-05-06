@@ -26,7 +26,7 @@ Die html response codes können hier nachgesehen werden:
 					type: string/number/date...
 				]
 			],
-			respones: [
+			responses: [
 				200: {
 					returnName: [
 						description: ...,
@@ -34,8 +34,7 @@ Die html response codes können hier nachgesehen werden:
 						content: {}
 					]
 				}
-				{404} : ...,
-				etc
+				404 : ...
 			]
 
 ---
@@ -47,11 +46,20 @@ Die html response codes können hier nachgesehen werden:
 			responses: [ 
 				200: {
 					users: [
-						type = array
+						type = array,
 						content: {
 							#user
 						}
 					]
+				},
+				400: {
+					error: { "no matchings" }
+				},
+				400: {
+					error: { "invalid radius" }
+				},
+				400: {
+					error: { "invalid category" }
 				}
 			]
 
@@ -75,23 +83,66 @@ Die html response codes können hier nachgesehen werden:
 			responses: [
 				200: {
 					#user
-				}
+				},
+				#idrequired400,
+				#idunvalid400,
+				#notauthorized401,
+				#insufficientrights401
 			]
 		post: create a new user
-			responses: [ 
-				201 : {
-					#user
+			parameters: [
+				user: {
+					type: object,
+					content: {
+						name: { type = string },
+						firstname: { type = string },
+						email: { type = string },
+						telefon: { type = number },
+						password: { type = string }
+					}
 				}
+			],
+			responses: [ 
+				201: {
+					#user
+				},
+				400: { "invalid content for user" }
 			]
 		put: update user information
+			parameters: [
+				user: {
+					type = object
+					content: {
+						name: { type = string },
+						firstname: { type = string },
+						location: { type = string, format = ? },
+						street: { type = string },
+						streetnumber: { type = number },
+						postalcode: { type = number },
+						place: { type = string },
+						email: { type = string },
+						telefon: { type = number },
+						lessons: [
+							type = array,
+							content: {
+								#lesson
+							}
+						] 
+					}
+				}
+			],
 			responses: [ 
 				200: {
 					#user
-				} 
+				},
+				#idrequired400,
+				#idunvalid400
 			]
 		delete: delete a user
 			responses: [ 
-				204 : OK
+				204 : OK,
+				#idrequired400,
+				#idunvalid400
 			]
 
 ---
@@ -106,10 +157,18 @@ Die html response codes können hier nachgesehen werden:
 			]
 			responses: [ 
 				204: OK,
+				#idrequired400,
+				#idunvalid400,
 				400: {
 					error: {
 						type = string,
-						value: { "user id required" }
+						value: { "old password unvalid" }
+					}
+				},
+				400: {
+					error: {
+						type = string,
+						value: { "new password unvalid" }
 					}
 				}
 			]
@@ -124,30 +183,54 @@ Die html response codes können hier nachgesehen werden:
 				200: {
 					messages: [
 						type = array,
-						
+						#message
 					]
 				},
-				401: Unauthorized,
-				400: {
-					error: {
-						type = string,
-						value: { "user id required" }
-					}
-				}
+				#unauthorized401,
+				#insufficientrights401,
+				#idrequired400,
 			]
 		post:
 			parameters: [
 				#message
 			]
 			responses: [ 
-				{201} : OK
+				201: OK,
+				#idrequired400,
+				#idunvalid400
 			]
 
 ---
 
 #### categories
 
-	/categories/{id}
+	/categories/{userId}
+		get {user id}: gets all categories one does offer
+			responses: {
+				200: {
+					categories: [
+						type: array,
+						category: { type : string }
+					]
+				},
+				#idunvalid400
+			}
+		get {no user id}: gets all categories that exist so far 
+			response: {
+				200: {
+					categories: [
+						type: array,
+						category: { type = string }
+					]
+				}
+			}
+			
+---
+
+#### token
+
+	/token
+		
 	
 ---
 
@@ -160,16 +243,22 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 	user: {
 		type = object
 		content: {
-			username: { type = string },
+			id: { type : number },
+			name: { type = string },
+			firstname: { type = string },
 			location: { type = string, format = ? },
+			street: { type = string },
+			streetnumber: { type = number },
+			postalcode: { type = number },
+			place: { type = string },
+			email: { type = string },
+			telefon: { type = number },
 			messages: [
 				type = array,
 				content: {
 					#message
 				}
 			],
-			email: { type = string },
-			telefon: { type = number },
 			lessons: [
 				type = array,
 				content: {
@@ -213,5 +302,46 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 			date: { type = date },
 			text: { type = string },
 			rating: { type = number }
+		}
+	}
+	
+---
+### Response Definitions
+
+In diesem Abschnitt werden einige der häufigen Response Codes beschrieben
+
+#### idrequired400
+
+	400: {
+		error: {
+			type = string,
+			value: { "id required" }
+		}
+	}
+	
+#### idunvalid400
+
+	400: {
+		error: {
+			type = string,
+			value: { "unvalid id" }
+		}
+	}
+
+#### notauthorized401
+
+	401: {
+		error: {
+			type = string,
+			value: { "unauthorized" }
+		}
+	}
+
+#### insufficientrights401
+
+	401: {
+		error: {
+			type = string,
+			value: { "insufficient system rights" }
 		}
 	}
