@@ -30,7 +30,7 @@ angular.module('app').controller('LoginCtrl', function($scope, $http, store, $st
             function(data, status) {
                 window.alert("Message: "+data+"/n Status: "+status);
             }
-        )
-    }
+        );
+    };
 
 });
