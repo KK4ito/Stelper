@@ -17,6 +17,10 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
         url: '/login',
         templateUrl: 'modules/login/login.html'
     });
+    $stateProvider.state('register', {
+        url: '/register',
+        templateUrl: 'modules/login/login.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
@@ -34,7 +38,7 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
     });
 });
 
-angular.module('app').run(function($rootScope) {
+angular.module('app').run(function($rootScope, $state, $stateParams) {
 
     /*
     For custom functions or pure javascript functions,
