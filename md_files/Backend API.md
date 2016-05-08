@@ -105,43 +105,28 @@ Die html response codes können hier nachgesehen werden:
 				201: {
 					#user
 				},
-				400: { "invalid content for user" }
+				400: { "invalid parameters" }
 			]
 		put: update user information
 			parameters: [
-				user: {
-					type = object
-					content: {
-						name: { type = string },
-						firstname: { type = string },
-						location: { type = string, format = ? },
-						street: { type = string },
-						streetnumber: { type = number },
-						postalcode: { type = number },
-						place: { type = string },
-						email: { type = string },
-						telefon: { type = number },
-						lessons: [
-							type = array,
-							content: {
-								#lesson
-							}
-						] 
-					}
-				}
+				#user
 			],
 			responses: [ 
 				200: {
 					#user
 				},
 				#idrequired400,
-				#idunvalid400
+				#idunvalid400,
+				#notauthorized401,
+				#insufficientrights401
 			]
 		delete: delete a user
 			responses: [ 
 				204 : OK,
 				#idrequired400,
-				#idunvalid400
+				#idunvalid400,
+				#notauthorized401,
+				#insufficientrights401
 			]
 
 ---
@@ -216,7 +201,7 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 		type = object
 		content: {
 			id: { type : number },
-			name: { type = string },
+			lastname: { type = string },
 			firstname: { type = string },
 			location: { type = string, format = ? },
 			street: { type = string },
@@ -224,7 +209,7 @@ In diesem Abschnitt werden einige der häufig verwendeten json objekte definiert
 			postalcode: { type = number },
 			place: { type = string },
 			email: { type = string },
-			telefon: { type = number },
+			telefon: { type = string },
 			lessons: [
 				type = array,
 				content: {
@@ -271,7 +256,7 @@ In diesem Abschnitt werden einige der häufigen Response Codes beschrieben
 	401: {
 		error: {
 			type = string,
-			value: { "unauthorized" }
+			value: { "not authorized" }
 		}
 	}
 
@@ -280,6 +265,6 @@ In diesem Abschnitt werden einige der häufigen Response Codes beschrieben
 	401: {
 		error: {
 			type = string,
-			value: { "insufficient system rights" }
+			value: { "insufficient permissions" }
 		}
 	}
