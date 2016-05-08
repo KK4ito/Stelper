@@ -1,6 +1,6 @@
 <div class="container" ng-controller="LoginCtrl">
 
-    <div class="panel-login center-block vertical-center">
+    <div class="panel-login">
         <div class="panel-heading">
             <div class="row">
                 <div class="col-xs-6">
@@ -16,11 +16,11 @@
         <form role="form" class="panel-body" ng-if="isLogin">
             <div class="form-group">
                 <label for="email">E-Mail</label>
-                <input type="text" class="form-control" id="email" ng-model="loginUser.email" placeholder="E-Mail">
+                <input type="text" class="form-control" id="email" ng-model="loginUser.email" placeholder="E-Mail" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" ng-model="loginUser.password" placeholder="Passwort">
+                <input type="password" class="form-control" id="password" ng-model="loginUser.password" placeholder="Passwort" required>
             </div>
             <div class="form-group">
                 <div class="row">
@@ -34,19 +34,19 @@
         <form role="form" class="panel-body" ng-if="!isLogin">
             <div class="form-group">
                 <label for="email">E-Mail</label>
-                <input type="text" class="form-control" id="email" ng-model="registerUser.username" placeholder="E-Mail">
+                <input type="text" class="form-control" id="email" ng-model="registerUser.username" placeholder="E-Mail" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" ng-model="registerUser.password" placeholder="Passwort">
+                <input type="password" class="form-control" id="password" ng-model="registerUser.password" placeholder="Passwort" required>
             </div>
             <div class="form-group">
                 <label for="prename">Vorname</label>
-                <input type="text" class="form-control" id="prename" ng-model="registerUser.prename" placeholder="Vorname">
+                <input type="text" class="form-control" id="prename" ng-model="registerUser.prename" placeholder="Vorname" required>
             </div>
             <div class="form-group">
                 <label for="surname">Nachname</label>
-                <input type="text" class="form-control" id="surname" ng-model="registerUser.surname" placeholder="Nachname">
+                <input type="text" class="form-control" id="surname" ng-model="registerUser.surname" placeholder="Nachname" required>
             </div>
             <div class="form-group">
                 <div class="row">

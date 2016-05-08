@@ -9,6 +9,7 @@
 @main-color-2: #60ba75;
 @main-color-3: #a8d5a5;
 @main-color-4: #bcbdbf;
+@error-color: #f2dede;
 /* Add Global LESS Variables Above */
 
 /* Component LESS */
@@ -51,5 +52,13 @@ main {
 
 .glyphicon {
     color: @main-color-4;
+}
+
+// Input validator colors
+input.ng-invalid.ng-touched {
+    background-color: @error-color;
+}
+input.ng-valid.ng-touched {
+    background-color: lighten(@main-color-3, 20%);
 }
 /* Add Global Style Above*/
