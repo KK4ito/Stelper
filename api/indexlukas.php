@@ -6,8 +6,8 @@ require '../../vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 
-define('DB_USERNAME', 'stelper');
-define('DB_PASSWORD', 'stelperinio2');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', 'stelperinio');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'stelper');
 
@@ -35,10 +35,10 @@ function getUsers($request, $response, $arguments) {
 
 function getConnection() {
     try {
-        return new PDO('mysql:host='+DB_HOST+';dbname='+DB_NAME, DB_USERNAME, DB_PASSWORD);
+        return new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USERNAME, DB_PASSWORD);
     } catch (PDOException $pdoe) {
         echo "Error connecting to MySql: " . $pdoe->getMessage() . ": on line " . $pdoe->getLine() . "<br/>";
-        //echo $pdoe->getTraceAsString(); // prints credentials > use with care
+        // echo $pdoe->getTraceAsString(); // prints credentials > use with care
         return null;
     }
 
