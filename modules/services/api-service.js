@@ -46,7 +46,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      */
     this.register = function (data, success, error) {
         $http.post(
-            BASE_API + '/users',
+            BASE_API + '/register',
             data
         ).success(success).error(error);
     };

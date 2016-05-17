@@ -1,6 +1,11 @@
-angular.module('app').controller('HomeCtrl',function($scope, $state, helperService, apiService){
+angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService){
 
-    helperService.getCurrentPosition().then(
+    // Settings, Checks
+
+    // Variables
+
+    // Function Definitions
+    actionService.getCurrentPosition().then(
         function (data) {
             // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
             $scope.setMap(data.coords.latitude, data.coords.longitude);
@@ -28,5 +33,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, helperServi
             console.log(status);
         });
     };
+
+    // Function Calls
 
 });

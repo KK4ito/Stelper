@@ -1,38 +1,50 @@
-angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store, $state, apiService){
+angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store, $state, apiService, md5){
 
+    // Settings, Checks
+
+    // Variables
     $scope.loginUser = {};
-    $scope.registerUser = {a:'', b:''};
+    $scope.registerUser = {};
     $scope.isLogin = ($state.current.name === 'login');
 
+    // Function Definitions
     $scope.login = function() {
-        if(Object.keys($scope.registerUser).length === 2) {
+        if(Object.keys($scope.loginUser).length === 2) {
+            $scope.loginUser.password = md5.createHash($scope.loginUser.password);
             apiService.login(
                 $scope.loginUser,
-                function(data, status) {
+                function(success, status) {
+                    var data = angular.fromJson(success);
                     store.set('token', data.token);
-                    //store.set('userId', data.userId); TODO: not implemented yet on server side
+                    store.set('userId', data.id);
                     $state.go('home');
                 },
-                function(data, status) {
-                    $rootScope.addAlert('danger', 'Error: '+status+' :: '+data);
+                function(error, status) {
+                    var data = angular.fromJson(error);
+                    $rootScope.addAlert('danger', 'Falsche E-Mail oder Passwort');
                 });
         }
     };
 
     $scope.register = function() {
         if(Object.keys($scope.registerUser).length === 4) {
+            $scope.registerUser.password = md5.createHash($scope.registerUser.password);
             apiService.register(
                 $scope.registerUser,
-                function(data, status) {
+                function(success, status) {
+                    var data = angular.fromJson(success);
                     store.set('token', data.token);
-                    //store.set('userId', data.userId); TODO: not implemented yet on server side
+                    store.set('userId', data.id);
                     $state.go('profile');
                 },
-                function(data, status) {
-                    $rootScope.addAlert('danger', 'Error: '+status+' :: '+data);
+                function(error, status) {
+                    var data = angular.fromJson(error);
+                    $rootScope.addAlert('danger', 'Error: '+status+' :: '+data.message);
                 }
             );
         }
     };
+
+    // Function Calls
 
 });

@@ -1,20 +1,25 @@
-angular.module('app').controller('ProfileCtrl',function($scope, $rootScope, apiService){
+angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, apiService, actionService){
 
-    $scope.loggedIn = $rootScope.loggedIn;
-    $scope.user = {};
+    // Settings, Checks
+    if (!$scope.loggedIn) { $state.go('login'); }
 
+    // Variables
+    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
+    $scope.user = {name: ""};
+
+    // Function Definitions
     $scope.getMyData = function () {
         apiService.getUser(1,
         function (success) {
-            window.console.log(success);
-            //var data = angular.fromJson(); // wenn kein JSON Objekt dann auskommentieren
+            var data = angular.fromJson(success);
+            console.log(data.name);
             $scope.user = data;
         },
         function (error) {
-            window.console.log(error);
-
+            console.log(error);
         });
     };
 
+    // Function Calls
     $scope.getMyData();
 });

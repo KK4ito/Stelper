@@ -14,11 +14,10 @@
 /* Add Global LESS Variables Above */
 
 /* Component LESS */
-@import "modules/directives/appfooter/appfooter.less";
-@import "modules/directives/appheader/appheader.less";
 @import "modules/login/login.less";
 @import "modules/home/home.less";
 @import "modules/profile/profile.less";
+@import "modules/header/header.less";
 /* Add Component LESS Above */
 
 /* Required for Angular UI Bootstrap */
@@ -50,6 +49,15 @@ main {
   height: 100%;
   position: relative;
   width: 100%;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    background-color: @main-color;
+    color: grey;
 }
 
 .glyphicon {

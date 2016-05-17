@@ -2,6 +2,7 @@ angular.module('app', [
     'ui.bootstrap',
     'ui.router',
     'ngAnimate',
+    'angular-md5',
     'angular-jwt',
     'angular-storage',
     'uiGmapgoogle-maps'
@@ -29,9 +30,16 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
     $urlRouterProvider.otherwise('/home');
 
     // Add Token to every request made
-    jwtInterceptorProvider.tokenGetter = function(store) {
-        return store.get('token');
-    };
+    jwtInterceptorProvider.tokenGetter = ['jwtHelper','store', function(jwtHelper, store, $state) {
+        var idToken = store.get('token');
+        if (store.get('token') !== null && jwtHelper.isTokenExpired(idToken)) {
+            //$state.go('login');
+            store.remove('token');
+            idToken = store.get('token');
+        }
+
+        return idToken;
+    }];
     $httpProvider.interceptors.push('jwtInterceptor');
 
     // Configure the google maps
@@ -42,7 +50,7 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
     });
 });
 
-angular.module('app').run(function($rootScope) {
+angular.module('app').run(function(store, $rootScope) {
 
     /*
      Feature for adding alerts. Can't be done by service/factory
@@ -54,25 +62,6 @@ angular.module('app').run(function($rootScope) {
     };
     $rootScope.closeAlert = function (index) {
         $rootScope.alerts.splice(index, 1);
-    };
-    $rootScope.loggedIn = false;
-
-    /*
-    For custom functions or pure javascript functions,
-    we have to apply them to make them work with angular.
-    Basically we tell angular that it should use a non-
-    Angular function. This safeApply is a better version of
-    The basic $apply of Angular itself.
-     */
-    $rootScope.safeApply = function(fn) {
-        var phase = $rootScope.$$phase;
-        if (phase === '$apply' || phase === '$digest') {
-            if (fn && (typeof(fn) === 'function')) {
-                fn();
-            }
-        } else {
-            this.$apply(fn);
-        }
     };
 
 });
