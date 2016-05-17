@@ -21,6 +21,10 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
         url: '/register',
         templateUrl: 'modules/login/login.html'
     });
+    $stateProvider.state('profile', {
+        url: '/profile',
+        templateUrl: 'modules/profile/profile.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
