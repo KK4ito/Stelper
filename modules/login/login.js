@@ -1,7 +1,7 @@
 angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store, $state, apiService){
 
     $scope.loginUser = {};
-    $scope.registerUser = {};
+    $scope.registerUser = {a:'', b:''};
     $scope.isLogin = ($state.current.name === 'login');
 
     $scope.login = function() {
