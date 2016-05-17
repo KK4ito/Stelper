@@ -17,6 +17,10 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
         url: '/login',
         templateUrl: 'modules/login/login.html'
     });
+    $stateProvider.state('register', {
+        url: '/register',
+        templateUrl: 'modules/login/login.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
@@ -35,6 +39,18 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
 });
 
 angular.module('app').run(function($rootScope) {
+
+    /*
+    Feature for adding alerts. Can't be done by service/factory
+    as those are singeltons.
+     */
+    $rootScope.alerts = [];
+    $rootScope.addAlert = function(type, msg) {
+        $rootScope.alerts.push({type:type, msg: msg});
+    };
+    $rootScope.closeAlert = function(index) {
+        $rootScope.alerts.splice(index, 1);
+    };
 
     /*
     For custom functions or pure javascript functions,
