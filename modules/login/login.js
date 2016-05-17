@@ -3,7 +3,6 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
     $scope.loginUser = {};
     $scope.registerUser = {};
     $scope.isLogin = ($state.current.name === 'login');
-    $scope.loggedIn
 
     $scope.login = function() {
         if(Object.keys($scope.registerUser).length === 2) {
