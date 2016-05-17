@@ -3,7 +3,11 @@
 /**
  * Database configuration
  */
-define('DB_USERNAME', 'stelper');
-define('DB_PASSWORD', 'stelperinio2');
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'stelper');
+return array('dbCred' => [
+		'db_username' => 'stelper',
+		'db_password' => 'stelperinio2',
+		'db_host' => 'localhost',
+		'db_name' => 'stelper'
+]);
+
+
