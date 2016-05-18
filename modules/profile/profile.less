@@ -112,71 +112,6 @@ div.upload input {
   padding: 10px 0;
 }
 
-/* Testimonials */
-.testimonials blockquote {
-  background: #FFCDB6 none repeat scroll 0 0;
-  border: medium none;
-  color: #e63f0c;
-  display: block;
-  font-size: 14px;
-  line-height: 20px;
-  padding: 15px;
-  position: relative;
-}
-.testimonials blockquote::before {
-  width: 0;
-  height: 0;
-  right: 0;
-  bottom: 0;
-  content: " ";
-  display: block;
-  position: absolute;
-  border-bottom: 20px solid #fff;
-  border-right: 0 solid transparent;
-  border-left: 15px solid transparent;
-  border-left-style: inset; /*FF fixes*/
-  border-bottom-style: inset; /*FF fixes*/
-}
-.testimonials blockquote::after {
-  width: 0;
-  height: 0;
-  right: 0;
-  bottom: 0;
-  content: " ";
-  display: block;
-  position: absolute;
-  border-style: solid;
-  border-width: 20px 20px 0 0;
-  border-color: #e63f0c transparent transparent transparent;
-}
-.testimonials .carousel-info img {
-  border: 1px solid #f5f5f5;
-  border-radius: 150px !important;
-  height: 75px;
-  padding: 3px;
-  width: 75px;
-}
-.testimonials .carousel-info {
-  overflow: hidden;
-}
-.testimonials .carousel-info img {
-  margin-right: 15px;
-}
-.testimonials .carousel-info span {
-  display: block;
-}
-.testimonials span.testimonials-name {
-  color: #e6400c;
-  font-size: 16px;
-  font-weight: 300;
-  margin: 23px 0 7px;
-}
-.testimonials span.testimonials-post {
-  color: #656565;
-  font-size: 12px;
-}
-
-/*++++++++*/
 .ng-exp > img {
   float: left;
   margin-right: 10px;
@@ -198,7 +133,6 @@ div.upload input {
   margin-bottom: 80px;
 }
 
-
 h3{
   color: @main-color-2;
   font-family: @main-font;
@@ -216,6 +150,10 @@ h3{
 }
 
 .btn-active .tabTitle{
+   color: black !important;
+}
+
+.btn-active .glyphicon{
   color: black !important;
 }
 
@@ -228,6 +166,10 @@ button#address:hover .tabTitle, button#privateLessons:hover .tabTitle {
   color: black;
   background-color: @main-color-3;
   border-color: @main-color-2;
+}
+
+button#address:hover .glyphicon, button#privateLessons:hover .glyphicon {
+  color: black;
 }
 
 button#address, button#privateLessons {
