@@ -43,6 +43,8 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 $app->post('/login', 'login');
 $app->get('/test', 'test');
 $app->get('/users', 'getUsers');
+$app->get('/users/{id}', 'getUser');
+$app->put('/users/{id}/picture', 'addUpdatePicture');
 
 $app->run();
 
@@ -72,6 +74,66 @@ function login($request, $response, $arguments) {
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
 
+function registerUser($request, $response, $arguments) {
+    $data = json_decode($request->getBody(), true);
+
+    $pdomysql = getConnection();
+
+    $sql = 'CALL registerUser(:firstname, :lastname, :email, :password)';
+    $query = $pdomysql->prepare($sql);
+
+    // Set parameters handed to the mysql stored procedure procedure
+    $query->bindParam(':firstname', htmlspecialchars($data["prename"]));
+    $query->bindParam(':lastname', htmlspecialchars($data["surname"]));
+    $query->bindParam(':email', htmlspecialchars($data["username"]));
+    $query->bindParam(':password', htmlspecialchars($data["password"]));
+
+    if($query->execute()) {
+        $lastInsertId = $pdomysql->lastInsertId();
+        $status = 201;
+        $gen = generateToken($request);
+        $data["id"] = $lastInsertId;
+        $data["token"] = $gen["token"];
+        $data["status"] = $gen["status"];
+    } else {
+        $status = 410;
+        $data["code"] = $query->errorCode();
+        $data["message"] = $query->errorInfo()[2];
+    }
+
+    $query->closeCursor();
+
+    /*
+    $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
+
+    if ($query->execute(array(
+        "name" => htmlspecialchars($data["prename"])." ".htmlspecialchars($data["surname"]),
+        "email" => htmlspecialchars($data["username"]),
+        "password" => htmlspecialchars($data["password"])
+    ))) {
+        $lastInsertId = $pdomysql->lastInsertId();
+        $status = 201;
+        $gen = generateToken($request);
+        $data["id"] = $lastInsertId;
+        $data["token"] = $gen["token"];
+        $data["status"] = $gen["status"];
+    } else {
+        $status = 410;
+        $data["code"] = $query->errorCode();
+        $data["message"] = $query->errorInfo()[2];
+    }
+    */
+
+    $pdomysql = null;
+
+    return $response->withStatus($status)
+        ->withHeader('Content-Type', 'application/json')
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+}
+
+function addUpdatePicture($request, $response, $arguments) {
+
+}
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
         ->withHeader('Content-Type', 'text/html')
@@ -109,4 +171,15 @@ function generateToken($request) {
     $data['token'] = $token;
 
     return $data;
+}
+
+function checkUser($email, $password) {
+    $pdomysql = getConnection();
+    $emailescaped = htmlspecialchars($email);
+    $passwordescaped = htmlspecialchars($password);
+
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
+    $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
+
+    return $query->rowCount() > 0;
 }
