@@ -92,13 +92,13 @@ function registerUser($request, $response, $arguments) {
 
     $pdomysql = getConnection();
 
-    $query = $pdomysql->prepare("INSERT INTO `User` (`name`,`email`,`password`) VALUES (
-		'".$data["name"]."',
-		'".$data["email"]."',
-		'".$data["password"]."'
-	");
+    $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
 
-    if ($query->execute()) {
+    if ($query->execute(array(
+        "name" => htmlspecialchars($data["prename"])." ".htmlspecialchars($data["surname"]),
+        "email" => htmlspecialchars($data["username"]),
+        "password" => htmlspecialchars($data["password"])
+    ))) {
         $lastInsertId = $pdomysql->lastInsertId();
         $status = 201;
         $gen = generateToken($request);
@@ -106,7 +106,7 @@ function registerUser($request, $response, $arguments) {
         $data["token"] = $gen["token"];
         $data["status"] = $gen["status"];
     } else {
-        $status = 409;
+        $status = 410;
         $data["code"] = $query->errorCode();
         $data["message"] = $query->errorInfo()[2];
     }

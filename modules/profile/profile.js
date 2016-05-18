@@ -1,10 +1,10 @@
 angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, apiService, actionService){
 
     // Settings, Checks
+    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
     if (!$scope.loggedIn) { $state.go('login'); }
 
     // Variables
-    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
     $scope.user = {name: ""};
 
     // Function Definitions
