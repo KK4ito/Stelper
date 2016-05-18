@@ -6,6 +6,7 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
 
     // Variables
     $scope.user = {name: ""};
+    $scope.actualTab = 'address';
 
     // Function Definitions
     $scope.getMyData = function () {
@@ -18,6 +19,14 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
         function (error) {
             console.log(error);
         });
+    };
+
+    $scope.changeTab = function (tab) {
+        $scope.actualTab = tab;
+    };
+
+    $scope.changeProfilePicture = function () {
+
     };
 
     // Function Calls

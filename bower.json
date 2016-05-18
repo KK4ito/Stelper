@@ -24,6 +24,7 @@
     "a0-angular-storage": "^0.0.15",
     "angular-jwt": "^0.0.9",
     "angular-google-maps": "^2.3.2",
-    "angular-md5": "^0.1.10"
+    "angular-md5": "^0.1.10",
+    "angular-base64-upload": "^0.1.19"
   }
 }
