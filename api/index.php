@@ -45,6 +45,7 @@ $app->post('/register', 'registerUser');
 $app->get('/test', 'test');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
+$app->put('/users/{id}/picture', 'addUpdatePicture');
 
 $app->run();
 
@@ -91,7 +92,31 @@ function registerUser($request, $response, $arguments) {
     $data = json_decode($request->getBody(), true);
 
     $pdomysql = getConnection();
+    $sql = 'CALL registerUser(:firstname, :lastname, :email, :password)';
+    $query = $pdomysql->prepare($sql);
 
+    // Set parameters handed to the mysql stored procedure procedure
+    $query->bindParam(':firstname', htmlspecialchars($data["prename"]));
+    $query->bindParam(':lastname', htmlspecialchars($data["surname"]));
+    $query->bindParam(':email', htmlspecialchars($data["username"]));
+    $query->bindParam(':password', htmlspecialchars($data["password"]));
+
+    if($query->execute()) {
+        $lastInsertId = $pdomysql->lastInsertId();
+        $status = 201;
+        $gen = generateToken($request);
+        $data["id"] = $lastInsertId;
+        $data["token"] = $gen["token"];
+        $data["status"] = $gen["status"];
+    } else {
+        $status = 410;
+        $data["code"] = $query->errorCode();
+        $data["message"] = $query->errorInfo()[2];
+    }
+
+    $query->closeCursor();
+
+    /*
     $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
 
     if ($query->execute(array(
@@ -110,6 +135,7 @@ function registerUser($request, $response, $arguments) {
         $data["code"] = $query->errorCode();
         $data["message"] = $query->errorInfo()[2];
     }
+    */
 
     $pdomysql = null;
 
@@ -118,6 +144,9 @@ function registerUser($request, $response, $arguments) {
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES));
 }
 
+function addUpdatePicture($request, $response, $arguments) {
+
+}
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
         ->withHeader('Content-Type', 'text/html')
