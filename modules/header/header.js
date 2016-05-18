@@ -1,4 +1,4 @@
-angular.module('app').controller('HeaderCtrl',function($state, $scope, actionService, store){
+angular.module('app').controller('HeaderCtrl',function($rootScope, $state, $scope, actionService, store){
 
     // Settings
 
@@ -6,6 +6,10 @@ angular.module('app').controller('HeaderCtrl',function($state, $scope, actionSer
     $scope.loggedIn = actionService.checkLoginState(store.get('token'));
 
     // Function Definitions
+    $rootScope.$on('updateNav', function (event, args) {
+        $scope.loggedIn = actionService.checkLoginState(store.get('token'));
+    });
+
     $scope.logout = function () {
         store.remove('token');
         store.remove('userId');

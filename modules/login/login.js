@@ -17,6 +17,7 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
                     var data = angular.fromJson(success);
                     store.set('token', data.token);
                     store.set('userId', data.id);
+                    $rootScope.$broadcast('updateNav', {});
                     $state.go('home');
                 },
                 function(error, status) {
@@ -35,6 +36,7 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
                     var data = angular.fromJson(success);
                     store.set('token', data.token);
                     store.set('userId', data.id);
+                    $rootScope.$broadcast('updateNav', {});
                     $state.go('profile');
                 },
                 function(error, status) {
