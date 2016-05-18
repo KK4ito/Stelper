@@ -51,7 +51,7 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
     });
 });
 
-angular.module('app').run(function(store, $rootScope) {
+angular.module('app').run(function(store, $rootScope, $timeout) {
 
     /*
      Feature for adding alerts. Can't be done by service/factory
@@ -60,6 +60,9 @@ angular.module('app').run(function(store, $rootScope) {
     $rootScope.alerts = [];
     $rootScope.addAlert = function (type, msg) {
         $rootScope.alerts.push({type: type, msg: msg});
+        $timeout(function () {
+            $rootScope.alerts.splice($rootScope.alerts.length-1, 1);
+        }, 4000);
     };
     $rootScope.closeAlert = function (index) {
         $rootScope.alerts.splice(index, 1);
