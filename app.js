@@ -27,6 +27,10 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
         url: '/profile',
         templateUrl: 'modules/profile/profile.html'
     });
+    $stateProvider.state('help', {
+        url: '/help',
+        templateUrl: 'modules/help/help.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
