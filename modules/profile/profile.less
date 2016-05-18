@@ -1,13 +1,3 @@
-div.upload {
-    width: 157px;
-    height: 57px;
-    overflow: hidden;
-}
-
-div.upload:hover {
-    background-color: rgba(188, 189, 191, 0.5);
-}
-
 .useravatar .upload {
     position: absolute;
     top: 50%;
@@ -17,12 +7,37 @@ div.upload:hover {
     border-radius: 50%;
 }
 
+div.upload {
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+}
+
 div.upload input {
-    display: block !important;
+    margin-top: -94px;
+    position: relative;
+    z-index: 1000;
     width: 250px !important;
     height: 250px !important;
     opacity: 0 !important;
     overflow: hidden !important;
+}
+
+div.upload .glyphicon.glyphicon-edit {
+    z-index: 10;
+    content: '\e065';
+    font-family: 'Glyphicons Halflings';
+    font-size: 0;
+    margin-top: 90px;
+}
+div.upload:hover .glyphicon.glyphicon-edit {
+    font-size: 50px;
+}
+div.upload:hover input {
+    margin-top: -144px !important;
+}
+div.upload:hover {
+    background-color: rgba(188, 189, 191, 0.5);
 }
 
 .card {

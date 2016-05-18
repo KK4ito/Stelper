@@ -7,6 +7,8 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
     // Variables
     $scope.user = {name: ""};
     $scope.actualTab = 'address';
+    $scope.avatarDefault = 'assets/defaultUser.jpg';
+    $scope.avatar64 = {base64: ''};
 
     // Function Definitions
     $scope.getMyData = function () {
@@ -26,7 +28,7 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
     };
 
     $scope.changeProfilePicture = function () {
-
+        // Todo: send to server
     };
 
     // Function Calls

@@ -120,4 +120,19 @@ angular.module('app').service('apiService',['$http', function($http) {
         ).success(success).error(error);
     };
 
+    /**
+     * Uploads a profile picture to the server as Base64 String.
+     *
+     * @param id        Takes an Integer value respresenting the users Identification Number
+     * @param data      Contaings Base64 String of picture
+     * @param success   Callback function called when request was successful
+     * @param error     Callback function called when request was unsucessful
+     */
+    this.uploadAvatar = function (id, data, success, error) {
+        $http.put(
+            BASE_API + '/users/' + id + '/picture',
+            data
+        ).success(success).error(error);
+    };
+
 }]);
