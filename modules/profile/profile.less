@@ -163,11 +163,45 @@
   margin: 30px 0;
 }
 
-/*###############*/
 #tab3 {
   height: 100px;
 }
 
-.col-lg-12{
+.UserProfile{
   margin-bottom: 80px;
+}
+
+h3{
+  color: @main-color-2;
+  font-family: @main-font;
+}
+
+.tabTitle{
+  color: @main-color-2;
+  font-family: @main-font;
+  font-size: 15pt;
+}
+
+.btn-active{
+  background-color: @main-color-3;
+  border-color: @main-color-2;
+}
+
+.btn-active .tabTitle{
+  color: black !important;
+}
+
+button#address:hover, button#privateLessons:hover {
+  background-color: @main-color-3;
+  border-color: @main-color-2;
+}
+
+button#address:hover .tabTitle, button#privateLessons:hover .tabTitle {
+  color: black;
+  background-color: @main-color-3;
+  border-color: @main-color-2;
+}
+
+button#address, button#privateLessons {
+  margin-bottom: 20px;
 }
