@@ -22,6 +22,13 @@ use Firebase\JWT\JWT;
 require '../../vendor/autoload.php';
 
 //-------------------------------------------------//
+// php settings
+//-------------------------------------------------//
+/*ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);*/
+
+//-------------------------------------------------//
 // App Initialize
 //-------------------------------------------------//
 define('DB_USERNAME', 'stelper');
@@ -32,7 +39,7 @@ define('DB_NAME', 'stelper');
 $app = new \Slim\App();
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/login", "/register"],
+    "passthrough" => ["/login", "/register", "/test", "/users"],
     "secure" => false,
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
@@ -42,10 +49,11 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 //-------------------------------------------------//
 $app->post('/login', 'login');
 $app->post('/register', 'registerUser');
-$app->get('/test', 'test');
+//$app->get('/test', 'test');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
+$app->get('/test', 'getTest');
 
 $app->run();
 
@@ -53,18 +61,54 @@ $app->run();
 // Rest Functions
 //-------------------------------------------------//
 function getUsers($request, $response, $arguments) {
+    $params = json_decode($request->getBody() ) ?: $request->getParams();
+
     $pdomysql = getConnection();
 
-    // TODO: if has arguments then do a filter sequence on the query.
+    $southwestlat = $params["southwest"]["latitude"];
+    $southwestlng = $params["southwest"]["longitude"];
 
-    $query = $pdomysql->prepare("SELECT * FROM `users`");
+    $northeastlat = $params["northeast"]["latitude"];
+    $northeastlng = $params["northeast"]["longitude"];
+
+    $status = 201;
+
+    if (isset($northeastlat) && isset($northeastlng)
+        && isset($southwestlat) && isset($southwestlng)
+        && isset($lat) && isset($lng)) {
+
+
+        $query = $pdomysql->prepare("SELECT * FROM `users` `u`
+            WHERE `u`.latitude < northeastlat
+            AND `u`.latitude > southwestlat
+            AND `u`.longitude < northeastlng
+            AND `u`.longitude > southwestlng");
+
+    } else {
+        if(!(isset($northeastlat) || isset($northeastlng)
+            || isset($southwestlat) || isset($southwestlng)
+            || isset($lat) || isset($lng))) {
+
+            // get all users
+            $query = $pdomysql->prepare("SELECT * FROM `users`");
+        } else {
+            $status = 400;
+        }
+    }
+
     $query->execute();
     $result = $query->fetchAll();
     $data = json_encode($result);
 
-    return $response->withStatus(201)
+    return $response
+        ->withStatus(201)
         ->withHeader('Content-Type', 'application/json')
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+}
+
+function getTest($request, $response, $arguments) {
+    $params = json_decode($request->getBody() ) ?: $request->getParams();
+    var_dump($params);
 }
 
 function getUser($request, $response, $arguments) {
@@ -95,13 +139,15 @@ function registerUser($request, $response, $arguments) {
     $sql = 'CALL registerUser(:firstname, :lastname, :email, :password)';
     $query = $pdomysql->prepare($sql);
 
-    // Set parameters handed to the mysql stored procedure procedure
-    $query->bindParam(':firstname', htmlspecialchars($data["prename"]));
-    $query->bindParam(':lastname', htmlspecialchars($data["surname"]));
-    $query->bindParam(':email', htmlspecialchars($data["username"]));
-    $query->bindParam(':password', htmlspecialchars($data["password"]));
+    $success = $query->execute(array(
+        'firstname' => htmlspecialchars($data["prename"]),
+        'lastname' => htmlspecialchars($data["surname"]),
+        'email' => htmlspecialchars($data["username"]),
+        'password' => htmlspecialchars($data["password"])));
 
-    if($query->execute()) {
+    $result = $query->fetch();
+
+    if($success) {
         $lastInsertId = $pdomysql->lastInsertId();
         $status = 201;
         $gen = generateToken($request);
@@ -111,48 +157,30 @@ function registerUser($request, $response, $arguments) {
     } else {
         $status = 410;
         $data["code"] = $query->errorCode();
-        $data["message"] = $query->errorInfo()[2];
+        $data["message"] = $result["error"];
     }
 
     $query->closeCursor();
-
-    /*
-    $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
-
-    if ($query->execute(array(
-        "name" => htmlspecialchars($data["prename"])." ".htmlspecialchars($data["surname"]),
-        "email" => htmlspecialchars($data["username"]),
-        "password" => htmlspecialchars($data["password"])
-    ))) {
-        $lastInsertId = $pdomysql->lastInsertId();
-        $status = 201;
-        $gen = generateToken($request);
-        $data["id"] = $lastInsertId;
-        $data["token"] = $gen["token"];
-        $data["status"] = $gen["status"];
-    } else {
-        $status = 410;
-        $data["code"] = $query->errorCode();
-        $data["message"] = $query->errorInfo()[2];
-    }
-    */
 
     $pdomysql = null;
 
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+
 }
 
 function addUpdatePicture($request, $response, $arguments) {
 
 }
+
+/* // Achtung es besteht bereits eine test route
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
         ->withHeader('Content-Type', 'text/html')
         ->write('Hello World');
 }
-
+*/
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
