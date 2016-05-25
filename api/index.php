@@ -162,6 +162,27 @@ function registerUser($request, $response, $arguments) {
 
     $query->closeCursor();
 
+    /*
+    $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
+
+    if ($query->execute(array(
+        "name" => htmlspecialchars($data["prename"])." ".htmlspecialchars($data["surname"]),
+        "email" => htmlspecialchars($data["username"]),
+        "password" => htmlspecialchars($data["password"])
+    ))) {
+        $lastInsertId = $pdomysql->lastInsertId();
+        $status = 201;
+        $gen = generateToken($request);
+        $data["id"] = $lastInsertId;
+        $data["token"] = $gen["token"];
+        $data["status"] = $gen["status"];
+    } else {
+        $status = 410;
+        $data["code"] = $query->errorCode();
+        $data["message"] = $query->errorInfo()[2];
+    }
+    */
+
     $pdomysql = null;
 
     return $response->withStatus($status)
