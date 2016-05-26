@@ -39,7 +39,7 @@ define('DB_NAME', 'stelper');
 $app = new \Slim\App();
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/login", "/register", "/test", "/users"],
+    "passthrough" => ["/login", "/register", "/test", "/users", "/categories"],
     "secure" => false,
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
@@ -54,45 +54,79 @@ $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
 $app->get('/test', 'getTest');
+$app->get('/categories', 'getCategories');
 
 $app->run();
 
 //-------------------------------------------------//
 // Rest Functions
 //-------------------------------------------------//
+function getCategories($request, $response, $arguments) {
+    $pdomysql = getConnection();
+
+    $sql = "SELECT `categoryName` FROM `categories`";
+    $query = $pdomysql->prepare($sql);
+
+    if (!$query->execute()) {
+        var_dump($query->errorInfo());
+        return $response
+            ->withStatus(400);
+    }
+
+    $result = $query->fetchAll();
+    $data = json_encode($result);
+
+    return $response
+        ->withStatus(200)
+        ->withHeader('Content-Type', 'application/json')
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+}
+
 function getUsers($request, $response, $arguments) {
     $params = json_decode($request->getBody() ) ?: $request->getParams();
 
     $pdomysql = getConnection();
 
-    $southwestlat = $params["southwest"]["latitude"];
-    $southwestlng = $params["southwest"]["longitude"];
+    $southwestlat = $params["southwestlat"];
+    $southwestlng = $params["southwestlng"];
 
-    $northeastlat = $params["northeast"]["latitude"];
-    $northeastlng = $params["northeast"]["longitude"];
+    $northeastlat = $params["northeastlat"];
+    $northeastlng = $params["northeastlng"];
 
-    $status = 201;
+    $status = 200;
 
     if (isset($northeastlat) && isset($northeastlng)
-        && isset($southwestlat) && isset($southwestlng)
-        && isset($lat) && isset($lng)) {
+        && isset($southwestlat) && isset($southwestlng)) {
 
+        $query = $pdomysql->prepare("SELECT * FROM `users`
+                    LEFT JOIN `lessons`
+                        ON `users`.`userId` = `lessons`.`userId`
+                    LEFT JOIN `categories`
+                        ON `lessons`.`categoryId` = `categories`.`categoryId`
+                    WHERE 	`users`.latitude < :northeastlat
+                    AND 	`users`.latitude > :southwestlat
+                    AND 	`users`.longitude < :northeastlng
+                    AND		`users`.longitude > :southwestlng");
 
-        $query = $pdomysql->prepare("SELECT * FROM `users` `u`
-            WHERE `u`.latitude < northeastlat
-            AND `u`.latitude > southwestlat
-            AND `u`.longitude < northeastlng
-            AND `u`.longitude > southwestlng");
+        $query->bindParam(":northeastlat", $northeastlat);
+        $query->bindParam(":northeastlng", $northeastlng);
+        $query->bindParam(":southwestlat", $southwestlat);
+        $query->bindParam(":southwestlng", $southwestlng);
 
     } else {
         if(!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
             || isset($lat) || isset($lng))) {
+            $query = $pdomysql->prepare("SELECT * FROM `users`
+                                                LEFT JOIN `lessons`
+                                                    ON `users`.`userId` = `lessons`.`userId`
+                                                LEFT JOIN `categories`
+                                                    ON `lessons`.`categoryId` = `categories`.`categoryId`");
 
-            // get all users
-            $query = $pdomysql->prepare("SELECT * FROM `users`");
         } else {
             $status = 400;
+            return $response
+                ->withStatus($status);
         }
     }
 
@@ -101,9 +135,9 @@ function getUsers($request, $response, $arguments) {
     $data = json_encode($result);
 
     return $response
-        ->withStatus(201)
+        ->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        ->write(json_encode($data));
 }
 
 function getTest($request, $response, $arguments) {
