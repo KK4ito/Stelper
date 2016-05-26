@@ -22,6 +22,13 @@ use Firebase\JWT\JWT;
 require '../../vendor/autoload.php';
 
 //-------------------------------------------------//
+// php settings
+//-------------------------------------------------//
+/*ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);*/
+
+//-------------------------------------------------//
 // App Initialize
 //-------------------------------------------------//
 define('DB_USERNAME', 'stelper');
@@ -32,7 +39,7 @@ define('DB_NAME', 'stelper');
 $app = new \Slim\App();
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/login", "/register"],
+    "passthrough" => ["/login", "/register", "/test", "/users", "/categories"],
     "secure" => false,
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
@@ -42,28 +49,100 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 //-------------------------------------------------//
 $app->post('/login', 'login');
 $app->post('/register', 'registerUser');
-$app->get('/test', 'test');
+//$app->get('/test', 'test');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
+$app->put('/users/{id}/picture', 'addUpdatePicture');
+$app->get('/test', 'getTest');
+$app->get('/categories', 'getCategories');
 
 $app->run();
 
 //-------------------------------------------------//
 // Rest Functions
 //-------------------------------------------------//
-function getUsers($request, $response, $arguments) {
+function getCategories($request, $response, $arguments) {
     $pdomysql = getConnection();
 
-    // TODO: if has arguments then do a filter sequence on the query.
+    $sql = "SELECT `categoryName` FROM `categories`";
+    $query = $pdomysql->prepare($sql);
 
-    $query = $pdomysql->prepare("SELECT * FROM `users`");
+    if (!$query->execute()) {
+        var_dump($query->errorInfo());
+        return $response
+            ->withStatus(400);
+    }
+
+    $result = $query->fetchAll();
+    $data = json_encode($result);
+
+    return $response
+        ->withStatus(200)
+        ->withHeader('Content-Type', 'application/json')
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+}
+
+function getUsers($request, $response, $arguments) {
+    $params = json_decode($request->getBody() ) ?: $request->getParams();
+
+    $pdomysql = getConnection();
+
+    $southwestlat = $params["southwestlat"];
+    $southwestlng = $params["southwestlng"];
+
+    $northeastlat = $params["northeastlat"];
+    $northeastlng = $params["northeastlng"];
+
+    $status = 200;
+
+    if (isset($northeastlat) && isset($northeastlng)
+        && isset($southwestlat) && isset($southwestlng)) {
+
+        $query = $pdomysql->prepare("SELECT * FROM `users`
+                    LEFT JOIN `lessons`
+                        ON `users`.`userId` = `lessons`.`userId`
+                    LEFT JOIN `categories`
+                        ON `lessons`.`categoryId` = `categories`.`categoryId`
+                    WHERE 	`users`.latitude < :northeastlat
+                    AND 	`users`.latitude > :southwestlat
+                    AND 	`users`.longitude < :northeastlng
+                    AND		`users`.longitude > :southwestlng");
+
+        $query->bindParam(":northeastlat", $northeastlat);
+        $query->bindParam(":northeastlng", $northeastlng);
+        $query->bindParam(":southwestlat", $southwestlat);
+        $query->bindParam(":southwestlng", $southwestlng);
+
+    } else {
+        if(!(isset($northeastlat) || isset($northeastlng)
+            || isset($southwestlat) || isset($southwestlng)
+            || isset($lat) || isset($lng))) {
+            $query = $pdomysql->prepare("SELECT * FROM `users`
+                                                LEFT JOIN `lessons`
+                                                    ON `users`.`userId` = `lessons`.`userId`
+                                                LEFT JOIN `categories`
+                                                    ON `lessons`.`categoryId` = `categories`.`categoryId`");
+
+        } else {
+            $status = 400;
+            return $response
+                ->withStatus($status);
+        }
+    }
+
     $query->execute();
     $result = $query->fetchAll();
     $data = json_encode($result);
 
-    return $response->withStatus(201)
+    return $response
+        ->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        ->write(json_encode($data));
+}
+
+function getTest($request, $response, $arguments) {
+    $params = json_decode($request->getBody() ) ?: $request->getParams();
+    var_dump($params);
 }
 
 function getUser($request, $response, $arguments) {
@@ -91,7 +170,33 @@ function registerUser($request, $response, $arguments) {
     $data = json_decode($request->getBody(), true);
 
     $pdomysql = getConnection();
+    $sql = 'CALL registerUser(:firstname, :lastname, :email, :password)';
+    $query = $pdomysql->prepare($sql);
 
+    $success = $query->execute(array(
+        'firstname' => htmlspecialchars($data["prename"]),
+        'lastname' => htmlspecialchars($data["surname"]),
+        'email' => htmlspecialchars($data["username"]),
+        'password' => htmlspecialchars($data["password"])));
+
+    $result = $query->fetch();
+
+    if($success) {
+        $lastInsertId = $pdomysql->lastInsertId();
+        $status = 201;
+        $gen = generateToken($request);
+        $data["id"] = $lastInsertId;
+        $data["token"] = $gen["token"];
+        $data["status"] = $gen["status"];
+    } else {
+        $status = 410;
+        $data["code"] = $query->errorCode();
+        $data["message"] = $result["error"];
+    }
+
+    $query->closeCursor();
+
+    /*
     $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
 
     if ($query->execute(array(
@@ -110,20 +215,27 @@ function registerUser($request, $response, $arguments) {
         $data["code"] = $query->errorCode();
         $data["message"] = $query->errorInfo()[2];
     }
+    */
 
     $pdomysql = null;
 
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+
 }
 
+function addUpdatePicture($request, $response, $arguments) {
+
+}
+
+/* // Achtung es besteht bereits eine test route
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
         ->withHeader('Content-Type', 'text/html')
         ->write('Hello World');
 }
-
+*/
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
