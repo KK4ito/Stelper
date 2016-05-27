@@ -6,7 +6,9 @@ angular.module('app', [
     'angular-jwt',
     'angular-storage',
     'uiGmapgoogle-maps',
-    'naif.base64'
+    'naif.base64',
+    'ngSanitize',
+    'ui.select'
 ]);
 
 angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateProvider, jwtInterceptorProvider, uiGmapGoogleMapApiProvider) {
