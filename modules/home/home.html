@@ -28,7 +28,7 @@
     </p>
 
     <div class="input-group">
-        <ui-select ng-model="cat.selected" theme="selectize" title="Wähle eine Kategorie">
+        <ui-select ng-model="cat.selected" theme="selectize" title="Wähle eine Kategorie" placeholder="Wähle eine Kategorie">
             <ui-select-match placeholder="Wähle oder suche eine Kategorie in der Liste...">{{$select.selected.categoryName}}</ui-select-match>
             <ui-select-choices repeat="category in categories | filter: $select.search">
                 <span ng-bind-html="category.categoryName | highlight: $select.search"></span>
