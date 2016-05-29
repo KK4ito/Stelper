@@ -11,9 +11,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     $scope.markers = [];
     ctrl.currentUser = {};
     $scope.categories = [];
-    $scope.mapRefresh = false;
     ctrl.defaultRadius = 0.3;
-
 
     // Function Definitions
     ctrl.createMarkers = function (center) {
@@ -28,6 +26,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             }
         },
         function (success) {
+            console.log(success);
             if (ctrl.filterSelected !== '') {
                 var data = angular.fromJson(success);
                 var filtered = data.filter(function (element) {
@@ -88,26 +87,29 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     // Function Calls
     ctrl.getCategoryList();
 
-    actionService.getCurrentPosition().then(
-        function (data) {
-            // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
-            ctrl.currentUser.latitude = data.coords.latitude;
-            ctrl.currentUser.longitude = data.coords.longitude;
-            var center = {
-                latitude: data.coords.latitude,
-                longitude: data.coords.longitude
-            };
-            ctrl.createMap(center, ctrl.createMarkers(center));
-        },
-        function (data) {
-            // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
-            // Default Center and TODO: Show Error Message
-            var center = {
-                latitude: 47,
-                longitude: 8
-            };
-            ctrl.createMap(center, ctrl.createMarkers(center));
-        }
-    );
+    angular.element(document).ready(function () {
+        actionService.getCurrentPosition().then(
+            function (data) {
+                // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
+                ctrl.currentUser.latitude = data.coords.latitude;
+                ctrl.currentUser.longitude = data.coords.longitude;
+                var center = {
+                    latitude: data.coords.latitude,
+                    longitude: data.coords.longitude
+                };
+                ctrl.createMap(center, ctrl.createMarkers(center));
+            },
+            function (data) {
+                // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
+                // Default Center and TODO: Show Error Message
+                console.log(data);
+                var center = {
+                    latitude: 47,
+                    longitude: 8
+                };
+                ctrl.createMap(center, ctrl.createMarkers(center));
+            }
+        );
+    });
 
 });

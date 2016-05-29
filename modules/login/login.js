@@ -22,7 +22,7 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
                 },
                 function(error, status) {
                     var data = angular.fromJson(error);
-                    $rootScope.addAlert('danger', 'Falsche E-Mail oder Passwort');
+                    $rootScope.$broadcast('addAlert', {type: 'danger', msg: 'Falsche E-Mail oder Passwort'});
                 });
         }
     };
@@ -41,7 +41,7 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
                 },
                 function(error, status) {
                     var data = angular.fromJson(error);
-                    $rootScope.addAlert('danger', 'Error: '+status+' :: '+data.message);
+                    $rootScope.$broadcast('addAlert', {type: 'danger', msg: 'Error: '+status+' :: '+data.message});
                 }
             );
         }

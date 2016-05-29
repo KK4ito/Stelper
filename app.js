@@ -51,27 +51,12 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
 
     // Configure the google maps
     uiGmapGoogleMapApiProvider.configure({
-        //    key: 'your api key',
-        v: '3.20', //defaults to latest 3.X anyhow
+        key: 'AIzaSyBcFkbm3_XmsSP-JHWEbVSlSN72GqZHAkk',
+        v: '3', //defaults to latest 3.X anyhow
         libraries: 'weather,geometry,visualization'
     });
 });
 
-angular.module('app').run(function(store, $rootScope, $timeout) {
-
-    /*
-     Feature for adding alerts. Can't be done by service/factory
-     as those are singeltons.
-     */
-    $rootScope.alerts = [];
-    $rootScope.addAlert = function (type, msg) {
-        $rootScope.alerts.push({type: type, msg: msg});
-        $timeout(function () {
-            $rootScope.alerts.splice($rootScope.alerts.length-1, 1);
-        }, 4000);
-    };
-    $rootScope.closeAlert = function (index) {
-        $rootScope.alerts.splice(index, 1);
-    };
+angular.module('app').run(function() {
 
 });
