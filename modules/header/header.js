@@ -15,7 +15,7 @@ angular.module('app').controller('HeaderCtrl',function($rootScope, $state, $scop
     $rootScope.$on('addAlert', function (event, args) {
         $scope.alerts.push({type: args.type, msg: args.msg});
         $timeout(function () {
-            $scope.alerts.splice($rootScope.alerts.length-1, 1);
+            $scope.alerts.splice($scope.alerts.length-1, 1);
         }, 4000);
     });
 
