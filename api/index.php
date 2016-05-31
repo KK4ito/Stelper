@@ -85,7 +85,7 @@ function getCategories($request, $response, $arguments) {
 function getUsers($request, $response, $arguments) {
     $params = json_decode($request->getBody() ) ?: $request->getParams();
 
-    $pdomysql = getConnection();
+    $pdoUsers = getConnection();
 
     $southwestlat = $params["southwestlat"];
     $southwestlng = $params["southwestlng"];
@@ -95,18 +95,20 @@ function getUsers($request, $response, $arguments) {
 
     $status = 200;
 
+    $sqlUsers = "SELECT `userId` , `firstname` , `lastname` , `email` ,
+            `phone` , `address` , `city` , `created` , `latitude` , `longitude`
+                FROM `users`";
+
     if (isset($northeastlat) && isset($northeastlng)
         && isset($southwestlat) && isset($southwestlng)) {
 
-        $query = $pdomysql->prepare("SELECT * FROM `users`
-                    LEFT JOIN `lessons`
-                        ON `users`.`userId` = `lessons`.`userId`
-                    LEFT JOIN `categories`
-                        ON `lessons`.`categoryId` = `categories`.`categoryId`
-                    WHERE 	`users`.latitude < :northeastlat
-                    AND 	`users`.latitude > :southwestlat
-                    AND 	`users`.longitude < :northeastlng
-                    AND		`users`.longitude > :southwestlng");
+        // Append filter to sqlUsers statement
+        $sqlUsers += "WHERE `users`.latitude < :northeastlat
+                        AND `users`.latitude > :southwestlat
+                        AND `users`.longitude < :northeastlng
+                        AND `users`.longitude > :southwestlng";
+
+        $query = $pdoUsers->prepare($sqlUsers);
 
         $query->bindParam(":northeastlat", $northeastlat);
         $query->bindParam(":northeastlng", $northeastlng);
@@ -117,11 +119,9 @@ function getUsers($request, $response, $arguments) {
         if(!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
             || isset($lat) || isset($lng))) {
-            $query = $pdomysql->prepare("SELECT * FROM `users`
-                                                LEFT JOIN `lessons`
-                                                    ON `users`.`userId` = `lessons`.`userId`
-                                                LEFT JOIN `categories`
-                                                    ON `lessons`.`categoryId` = `categories`.`categoryId`");
+
+            // use sqlUsers statement without filter
+            $query = $pdoUsers->prepare($sqlUsers);
 
         } else {
             $status = 400;
@@ -130,8 +130,35 @@ function getUsers($request, $response, $arguments) {
         }
     }
 
+    // Got all users but no lessons
     $query->execute();
     $result = $query->fetchAll();
+
+    foreach ($result as $key => $user) {
+
+        $pdoLessons = getConnection();
+        $userId = $user["userId"];
+
+        $query = $pdoLessons->prepare("SELECT `lessonId`,`categoryName`,`visible`
+                                          FROM `lessons`
+                                          LEFT JOIN `categories`
+                                              ON `lessons`.`categoryId` = `categories`.`categoryId`
+                                          WHERE `lessons`.`userId` = :userId");
+
+        $query->bindParam(":userId", $userId);
+
+        if (!$query->execute()) {
+            $status = 400;
+            return $response
+                ->withStatus($status);
+        }
+
+        $lessons = $query->fetchAll();
+
+        $user["lessons"] = $lessons;
+        $result[$key] = $user; // assign changes user to old key in $result
+    }
+
     $data = json_encode($result);
 
     return $response
