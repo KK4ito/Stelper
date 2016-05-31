@@ -1,16 +1,33 @@
-angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, apiService, actionService){
+angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, apiService, actionService) {
 
     // Settings, Checks
     $scope.loggedIn = actionService.checkLoginState(store.get('token'));
-    if (!$scope.loggedIn) { $state.go('login'); }
+    if (!$scope.loggedIn) {
+        $state.go('login');
+    }
 
     // Variables
+    var ctrl = this;
     $scope.user = {name: ""};
     $scope.actualTab = 'address';
     $scope.avatarDefault = 'assets/defaultUser.jpg';
     $scope.avatar64 = {base64: ''};
+    $scope.selectedCategory = 1;
+    $scope.loaded = false;
 
     // Function Definitions
+    ctrl.getCategoryList = function () {
+        apiService.getCategories(
+            function (success) {
+                $scope.categories = angular.fromJson(success);
+                $scope.loaded = true;
+            },
+            function (error) {
+
+            }
+        );
+    };
+
     $scope.getMyData = function () {
         apiService.getUser(1,
         function (success) {
@@ -33,4 +50,5 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
 
     // Function Calls
     $scope.getMyData();
+    ctrl.getCategoryList();
 });
