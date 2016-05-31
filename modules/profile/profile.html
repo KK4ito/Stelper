@@ -14,7 +14,7 @@
                         <input on-after-validate="changeProfilePicture" type="file" ng-model="avatar64" base-sixty-four-input name="button" maxsize="1000" accept="image/jpg, image/png, image/jpeg">
                     </div>
                 </div>
-                <div class="card-info"> <span class="card-title">UserName</span>
+                <div class="card-info"> <span class="card-title">{{ user.firstname }} {{ user.lastname }}</span>
 
                 </div>
             </div>
@@ -74,14 +74,38 @@
                 <div class="tab-pane fade in" id="tab2">
                     <h3>Meine Nachhilfe</h3> <!--TODO Nachhilfe, löschen + sichtbar (oder nicht)-->
 
-                    <div class="input-group">
-                            <span class="input-group-addon">
-                                <input type="checkbox">
-                                </span>
-                        <select ng-if="loaded" class="form-control" name="mySelect" id="mySelect"
-                                ng-options="option.categoryName for option in categories track by option.categoryId"
-                                ng-model="selectedCategory"></select>
-                    </div>
+                    <table class="table">
+                        <tr ng-repeat="lesson in user.lessons">
+                            <td class="col col-xs-1">
+                                <input type="checkbox"
+                                       ng-model="lesson.visible"
+                                       ng-true-value="'1'"
+                                       ng-false-value="'0'">
+                            </td>
+                            <td class="col col-xs-1">
+                                <button class="btn btn-danger" ng-click="deleteOldLesson($index)"><i class="glyphicon glyphicon-trash"></i></button>
+                            </td>
+                            <td class="col col-md-10">{{lesson.categoryName}}</td>
+                        </tr>
+                        <tr ng-repeat="newLesson in newLessons">
+                            <td class="col col-xs-1">
+                                <input type="checkbox"
+                                       ng-model="newLesson.visible"
+                                       ng-true-value="'1'"
+                                       ng-false-value="'0'">
+                            </td>
+                            <td class="col col-xs-1">
+                                <button class="btn btn-danger" ng-click="deleteNewLesson($index)"><i class="glyphicon glyphicon-trash"></i></button>
+                            </td>
+                            <td class="col col-md-10">
+                                <select class="form-control"
+                                        ng-model="newLesson.categoryId"
+                                        ng-options="option.categoryId as option.categoryName for option in categories">
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <button ng-if="categories.length != (user.lessons.length + newLessons.length)" ng-click="addLesson()" class="btn btn-block btn-success">Füge eine neue Nachhilfe hinzu</button>
                 </div>
             </div>
         </div>

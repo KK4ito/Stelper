@@ -13,14 +13,14 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
     $scope.avatarDefault = 'assets/defaultUser.jpg';
     $scope.avatar64 = {base64: ''};
     $scope.selectedCategory = 1;
-    $scope.loaded = false;
+    $scope.newLessons = [];
+    $scope.categories = [];
 
     // Function Definitions
-    ctrl.getCategoryList = function () {
+    $scope.getCategoryList = function () {
         apiService.getCategories(
             function (success) {
                 $scope.categories = angular.fromJson(success);
-                $scope.loaded = true;
             },
             function (error) {
 
@@ -34,6 +34,7 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
             var data = angular.fromJson(success);
             console.log(data.name);
             $scope.user = data;
+            console.log(data.lessons);
         },
         function (error) {
             console.log(error);
@@ -48,7 +49,30 @@ angular.module('app').controller('ProfileCtrl',function(store, $state, $scope, a
         // Todo: send to server
     };
 
+    $scope.addLesson = function () {
+        var newItem = {categoryName: '', categoryId: '1', visible: '1'};
+        $scope.newLessons.push(newItem);
+    };
+
+
+    $scope.deleteNewLesson = function (index) {
+        $scope.newLessons.splice(index, 1);
+    };
+
+    $scope.deleteOldLesson = function (index) {
+        $scope.user.lessons.splice(index, 1);
+    };
+
+    $scope.save = function () {
+        // Gebe den newLessons Objekten den categoryName entsprechend einem Vergleich mit der categoryId in categories.
+        // Das muss gemacht werden da wir von einem Select Element nur die value erhalten aber nicht den namen.
+
+        // pushe neue lessons in user.lessons array
+
+        // Rufe Rest api auf um user objekt zu speichern in Datenbank
+    };
+
     // Function Calls
     $scope.getMyData();
-    ctrl.getCategoryList();
+    $scope.getCategoryList();
 });

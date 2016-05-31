@@ -53,7 +53,7 @@ $app->post('/register', 'registerUser');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
-$app->get('/test', 'getTest');
+$app->get('/test', 'test');
 $app->get('/categories', 'getCategories');
 
 $app->run();
@@ -256,13 +256,13 @@ function addUpdatePicture($request, $response, $arguments) {
 
 }
 
-/* // Achtung es besteht bereits eine test route
+// Achtung es besteht bereits eine test route
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
         ->withHeader('Content-Type', 'text/html')
         ->write('Hello World');
 }
-*/
+
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
