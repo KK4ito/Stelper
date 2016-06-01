@@ -53,6 +53,7 @@ $app->post('/register', 'registerUser');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
+$app->put('/users/{id}/password', 'updatePassword');
 $app->get('/test', 'getTest');
 $app->get('/categories', 'getCategories');
 
@@ -64,7 +65,7 @@ $app->run();
 function getCategories($request, $response, $arguments) {
     $pdomysql = getConnection();
 
-    $sql = "SELECT `categoryName` FROM `categories`";
+    $sql = "SELECT `categoryId`, `categoryName` FROM `categories`";
     $query = $pdomysql->prepare($sql);
 
     if (!$query->execute()) {
@@ -73,8 +74,7 @@ function getCategories($request, $response, $arguments) {
             ->withStatus(400);
     }
 
-    $result = $query->fetchAll();
-    $data = json_encode($result);
+    $data = $query->fetchAll();
 
     return $response
         ->withStatus(200)
@@ -82,89 +82,75 @@ function getCategories($request, $response, $arguments) {
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
 
+/**
+ * @param $request
+ * @param $response
+ * @param $arguments
+ * @return all users and their lessons but does not contain passwords
+ */
 function getUsers($request, $response, $arguments) {
     $params = json_decode($request->getBody() ) ?: $request->getParams();
-
-    $pdoUsers = getConnection();
-
-    $southwestlat = $params["southwestlat"];
-    $southwestlng = $params["southwestlng"];
-
-    $northeastlat = $params["northeastlat"];
-    $northeastlng = $params["northeastlng"];
-
-    $status = 200;
+    $southwestlat = $params["southwestlat"]; $southwestlng = $params["southwestlng"];
+    $northeastlat = $params["northeastlat"]; $northeastlng = $params["northeastlng"];
 
     $sqlUsers = "SELECT `userId` , `firstname` , `lastname` , `email` ,
-            `phone` , `address` , `city` , `created` , `latitude` , `longitude`
-                FROM `users`";
+                        `phone` , `streetName` , `place` , `created` , `latitude` ,
+                        `longitude`, `streetNr`, `postalCode` FROM `users` ";
 
-    if (isset($northeastlat) && isset($northeastlng)
-        && isset($southwestlat) && isset($southwestlng)) {
+    $pdoUsers = getConnection();
+    if (isset($northeastlat) AND isset($northeastlng)
+        AND isset($southwestlat) AND isset($southwestlng)) {
 
         // Append filter to sqlUsers statement
-        $sqlUsers += "WHERE `users`.latitude < :northeastlat
-                        AND `users`.latitude > :southwestlat
-                        AND `users`.longitude < :northeastlng
-                        AND `users`.longitude > :southwestlng";
+        $sqlUsers .= "WHERE (`users`.latitude < :northeastlat)
+                        AND (`users`.latitude > :southwestlat)
+                        AND (`users`.longitude < :northeastlng)
+                        AND (`users`.longitude > :southwestlng)";
 
         $query = $pdoUsers->prepare($sqlUsers);
+        $query->bindParam(":northeastlat", $northeastlat, PDO::PARAM_STR);
+        $query->bindParam(":northeastlng", $northeastlng, PDO::PARAM_STR);
+        $query->bindParam(":southwestlat", $southwestlat, PDO::PARAM_STR);
+        $query->bindParam(":southwestlng", $southwestlng, PDO::PARAM_STR);
 
-        $query->bindParam(":northeastlat", $northeastlat);
-        $query->bindParam(":northeastlng", $northeastlng);
-        $query->bindParam(":southwestlat", $southwestlat);
-        $query->bindParam(":southwestlng", $southwestlng);
-
-    } else {
-        if(!(isset($northeastlat) || isset($northeastlng)
+    } else { if(!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
             || isset($lat) || isset($lng))) {
 
             // use sqlUsers statement without filter
             $query = $pdoUsers->prepare($sqlUsers);
-
         } else {
-            $status = 400;
-            return $response
-                ->withStatus($status);
-        }
-    }
+            return $response->withStatus(400);
+    } }
 
     // Got all users but no lessons
-    $query->execute();
-    $result = $query->fetchAll();
+    if(!$query->execute()) { return $response ->withStatus(400); }
 
-    foreach ($result as $key => $user) {
+    $data = $query->fetchAll();
 
+    foreach ($data as $key => $user) {
         $pdoLessons = getConnection();
         $userId = $user["userId"];
 
-        $query = $pdoLessons->prepare("SELECT `lessonId`,`categoryName`,`visible`
+        $query = $pdoLessons->prepare("SELECT `lessonId`, `categories`.`categoryId`, `categoryName`
                                           FROM `lessons`
                                           LEFT JOIN `categories`
                                               ON `lessons`.`categoryId` = `categories`.`categoryId`
-                                          WHERE `lessons`.`userId` = :userId");
-
+                                          WHERE `lessons`.`userId` = :userId
+                                          AND `lessons`.visible = 1");
         $query->bindParam(":userId", $userId);
 
-        if (!$query->execute()) {
-            $status = 400;
-            return $response
-                ->withStatus($status);
-        }
+        if (!$query->execute()) { return $response->withStatus(400); }
 
         $lessons = $query->fetchAll();
-
         $user["lessons"] = $lessons;
-        $result[$key] = $user; // assign changes user to old key in $result
+        $data[$key] = $user; // assign changes user to old key in $result
     }
 
-    $data = json_encode($result);
-
     return $response
-        ->withStatus($status)
+        ->withStatus(200)
         ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data));
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
 
 function getTest($request, $response, $arguments) {
@@ -175,12 +161,32 @@ function getTest($request, $response, $arguments) {
 function getUser($request, $response, $arguments) {
     $pdomysql = getConnection();
 
-    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `id`=:id");
-    $query->execute(array('id' => $arguments['id']));
-    $result = $query->fetch();
-    $data = json_encode($result);
+    $userId = $arguments['id'];
 
-    return $response->withStatus(201)
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `userId`=:userId");
+    $query->bindParam(":userId", $userId);
+
+    if(!$query->execute()) { return $response->withStatus(400); }
+
+    // Get all user but no lessons
+    $data = $query->fetch();
+
+    $pdoLessons = getConnection();
+    $query = $pdoLessons->prepare("SELECT `lessonId`, `categories`.`categoryId`, `categoryName`, `visible`
+                                          FROM `lessons`
+                                          LEFT JOIN `categories`
+                                              ON `lessons`.`categoryId` = `categories`.`categoryId`
+                                          WHERE `lessons`.`userId` = :userId");
+    $query->bindParam(":userId", $userId);
+
+    if (!$query->execute()) { return $response->withStatus(400); }
+
+    // Get all lessons of a user
+    $lessons = $query->fetchAll();
+    // store all lessons into a new key
+    $data["lessons"] = $lessons;
+
+    return $response->withStatus(200)
         ->withHeader('Content-Type', 'application/json')
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
@@ -197,54 +203,27 @@ function registerUser($request, $response, $arguments) {
     $data = json_decode($request->getBody(), true);
 
     $pdomysql = getConnection();
-    $sql = 'CALL registerUser(:firstname, :lastname, :email, :password)';
+    // MySQL überprüft ob die email bereits existiert, da diese unique sein muss
+    $sql = 'INSERT INTO users (`firstname`, `lastname`, `email`, `password`)
+		      VALUES (:firstname, :lastname, :email, :password)';
     $query = $pdomysql->prepare($sql);
+    $query->bindParam(":firstname", htmlspecialchars($data["prename"]));
+    $query->bindParam(":lastname", htmlspecialchars($data["surname"]));
+    $query->bindParam(":email", htmlspecialchars($data["username"]));
+    $query->bindParam(":password", htmlspecialchars($data["password"]));
 
-    $success = $query->execute(array(
-        'firstname' => htmlspecialchars($data["prename"]),
-        'lastname' => htmlspecialchars($data["surname"]),
-        'email' => htmlspecialchars($data["username"]),
-        'password' => htmlspecialchars($data["password"])));
-
-    $result = $query->fetch();
-
-    if($success) {
+    if(!$query->execute()) {
+        return $response->withStatus(400)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(json_encode($query->errorInfo(), JSON_UNESCAPED_SLASHES));
+    } else {
+        $gen = generateToken($request);
         $lastInsertId = $pdomysql->lastInsertId();
         $status = 201;
-        $gen = generateToken($request);
         $data["id"] = $lastInsertId;
         $data["token"] = $gen["token"];
         $data["status"] = $gen["status"];
-    } else {
-        $status = 410;
-        $data["code"] = $query->errorCode();
-        $data["message"] = $result["error"];
     }
-
-    $query->closeCursor();
-
-    /*
-    $query = $pdomysql->prepare("INSERT INTO `users` (`name`,`email`,`password`) VALUES (:name, :email, :password)");
-
-    if ($query->execute(array(
-        "name" => htmlspecialchars($data["prename"])." ".htmlspecialchars($data["surname"]),
-        "email" => htmlspecialchars($data["username"]),
-        "password" => htmlspecialchars($data["password"])
-    ))) {
-        $lastInsertId = $pdomysql->lastInsertId();
-        $status = 201;
-        $gen = generateToken($request);
-        $data["id"] = $lastInsertId;
-        $data["token"] = $gen["token"];
-        $data["status"] = $gen["status"];
-    } else {
-        $status = 410;
-        $data["code"] = $query->errorCode();
-        $data["message"] = $query->errorInfo()[2];
-    }
-    */
-
-    $pdomysql = null;
 
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
@@ -254,6 +233,43 @@ function registerUser($request, $response, $arguments) {
 
 function addUpdatePicture($request, $response, $arguments) {
 
+}
+
+function updatePassword($request, $response, $arguments) {
+    $userId = $arguments["id"];
+    $data = json_decode($request->getBody());
+    $oldPassword = $data["oldPassword"];
+    $newPassword = $data["newPassword"];
+
+    $pdoOldPw = getConnection();
+
+    $sqlOldPw = "SELECT count(`password`) AS pwValid FROM `users`
+                    WHERE `users`.`userId` = :userId
+                    AND `users`.`password` = :oldPassword";
+    $query = $pdoOldPw->prepare($sqlOldPw);
+    $query->bindParam(":userId", $userId);
+    $query->bindParam(":oldPassword", $oldPassword);
+
+    if(!$query->execute()) { return $response->withStatus(400); }
+
+    $pwValid = $query->fetch();
+    if (!$pwValid) { return $response-> withStatus(400); }
+
+    $pdoNewPw = getConnection();
+    $sqlNewPw = "UPDATE `users`(`password`)
+                    VALUES (:newPassword)
+                        WHERE `users`.`userId` = :userId";
+    $query = $pdoNewPw->prepare($sqlNewPw);
+    $query->bindParam(":userId", $userId);
+    $query->bindParam(":newPassword", $newPassword);
+
+    if (!$query->execute()) { return $response->withStatus(400); }
+
+    $data = $userId;
+
+    return $response->withStatus(200)
+        ->withHeader('Content-Type', 'application/json')
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
 
 /* // Achtung es besteht bereits eine test route
@@ -301,15 +317,4 @@ function generateToken($request) {
 
 
     return $data;
-}
-
-function checkUser($email, $password) {
-    $pdomysql = getConnection();
-    $emailescaped = htmlspecialchars($email);
-    $passwordescaped = htmlspecialchars($password);
-
-    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
-    $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
-
-    return $query->rowCount() > 0;
 }
