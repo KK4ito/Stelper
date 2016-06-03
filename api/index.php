@@ -52,6 +52,7 @@ $app->post('/register', 'registerUser');
 //$app->get('/test', 'test');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
+$app->delete('/users/{id}', 'deleteUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
 $app->put('/users/{id}/password', 'updatePassword');
 $app->get('/test', 'getTest');
@@ -163,7 +164,7 @@ function getUser($request, $response, $arguments) {
 
     $userId = $arguments['id'];
 
-    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `userId`=:userId");
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `users`.`userId`=:userId");
     $query->bindParam(":userId", $userId);
 
     if(!$query->execute()) { return $response->withStatus(400); }
@@ -190,6 +191,15 @@ function getUser($request, $response, $arguments) {
         ->withHeader('Content-Type', 'application/json')
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 }
+
+/*function deleteUser($request, $response, $arguments) {
+    $userId = $arguments["id"];
+    $data = json_decode($request->getBody(), true);
+
+    if(checkPassword($request, $response, $arguments)) {
+
+    }
+}*/
 
 function login($request, $response, $arguments) {
     $data = generateToken($request);
@@ -227,7 +237,7 @@ function registerUser($request, $response, $arguments) {
 
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 
 }
 
@@ -238,38 +248,33 @@ function addUpdatePicture($request, $response, $arguments) {
 function updatePassword($request, $response, $arguments) {
     $userId = $arguments["id"];
     $data = json_decode($request->getBody());
-    $oldPassword = $data["oldPassword"];
-    $newPassword = $data["newPassword"];
+    $newPassword = $data->newPassword;
 
-    $pdoOldPw = getConnection();
+    $pdoMySql = getConnection();
 
-    $sqlOldPw = "SELECT count(`password`) AS pwValid FROM `users`
-                    WHERE `users`.`userId` = :userId
-                    AND `users`.`password` = :oldPassword";
-    $query = $pdoOldPw->prepare($sqlOldPw);
-    $query->bindParam(":userId", $userId);
-    $query->bindParam(":oldPassword", $oldPassword);
-
-    if(!$query->execute()) { return $response->withStatus(400); }
-
-    $pwValid = $query->fetch();
-    if (!$pwValid) { return $response-> withStatus(400); }
-
-    $pdoNewPw = getConnection();
-    $sqlNewPw = "UPDATE `users`(`password`)
-                    VALUES (:newPassword)
+    if (checkPassword($request, $response, $arguments)) {
+        $sqlNewPw = "UPDATE `users`
+                    SET password=:newPassword
                         WHERE `users`.`userId` = :userId";
-    $query = $pdoNewPw->prepare($sqlNewPw);
-    $query->bindParam(":userId", $userId);
-    $query->bindParam(":newPassword", $newPassword);
+        $query = $pdoMySql->prepare($sqlNewPw);
+        $query->bindParam(":userId", $userId);
+        $query->bindParam(":newPassword", $newPassword);
 
-    if (!$query->execute()) { return $response->withStatus(400); }
+        if (!$query->execute()) { return $response->withStatus(400)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)); }
+    } else {
+        $data = (object) array();
+        return $response->withStatus(400)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    }
 
     $data = $userId;
 
     return $response->withStatus(200)
         ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        ->write(jsonifyWithMessage($data, ""));
 }
 
 /* // Achtung es besteht bereits eine test route
@@ -282,6 +287,46 @@ function test($request, $response, $arguments) {
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
+function respond($response, $status, $data, $message) {
+    $response->withStatus($status)
+        ->withHeader('Content-Type', 'application/json')
+        ->write(jsonifyWithMessage($data, $message));
+}
+
+function jsonifyWithMessage($data, $message) {
+    $data->message=$message;
+    return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+}
+
+function checkPassword($request, $response, $arguments) {
+    $userId = $arguments["id"];
+    $data = json_decode($request->getBody());
+
+    $oldPassword = $data->oldPassword;
+
+    $pdoMySql = getConnection();
+
+    $sqlOldPw = "SELECT `password` AS pwValid FROM `users`
+                    WHERE `users`.`userId` = :userId
+                    AND `users`.`password` = :oldPassword";
+
+    $query = $pdoMySql->prepare($sqlOldPw);
+    $query->bindParam(":userId", $userId);
+    $query->bindParam(":oldPassword", $oldPassword);
+
+    if(!$query->execute()) {
+        return false;
+    }
+
+    $pwValid = $query->rowCount();
+
+    if ($pwValid===0) {
+        return false;
+    }
+
+    return true;
+}
+
 function getConnection() {
     try {
         return new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USERNAME, DB_PASSWORD);
@@ -290,7 +335,6 @@ function getConnection() {
         // echo $pdoe->getTraceAsString(); // prints credentials > use with care
         return null;
     }
-
 }
 
 function generateToken($request) {
@@ -315,6 +359,14 @@ function generateToken($request) {
         $data['code'] = 401;
     }
 
-
     return $data;
+}
+
+function checkUser($email, $password) {
+    $pdomysql = getConnection();
+    $emailescaped = htmlspecialchars($email);
+    $passwordescaped = htmlspecialchars($password);
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
+    $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
+    return $query->rowCount() > 0;
 }
