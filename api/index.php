@@ -115,18 +115,18 @@ function getUsers($request, $response, $arguments) {
         $query->bindParam(":southwestlng", $southwestlng, PDO::PARAM_STR);
 
     } else {
-        if(!(isset($northeastlat) || isset($northeastlng)
+        if (!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
-            || isset($lat) || isset($lng))) {
-
+            || isset($lat) || isset($lng))
+        ) {
             // use sqlUsers statement without filter
             $query = $pdoUsers->prepare($sqlUsers);
         } else {
-            return respind($response, 400, "all parameters in arguments must be set");
-    } }
+            return respond($response, 400, "all parameters in arguments must be set", (object)array()); }
+    }
 
     // Got all users but no lessons
-    if(!$query->execute()) { return respond($response, 400, "failed to fetch all users"); }
+    if(!$query->execute()) { return respond($response, 400, "failed to fetch all users", (object)array()); }
 
     $data = $query->fetchAll();
 
@@ -142,7 +142,8 @@ function getUsers($request, $response, $arguments) {
                                           AND `lessons`.visible = 1");
         $query->bindParam(":userId", $userId);
 
-        if (!$query->execute()) { return respond($response, 400, "failed to fetch lessons for user with id: ".$userId); }
+        if (!$query->execute()) {
+            return respond($response, 400, "failed to fetch lessons for user with id: ".$userId, (object)array()); }
 
         $lessons = $query->fetchAll();
         $user["lessons"] = $lessons;
@@ -166,7 +167,6 @@ function getUser($request, $response, $arguments) {
     $query->bindParam(":userId", $userId);
 
     if(!$query->execute()) {
-        $data = (object) array();
         return respond($response, 400, "failed to fetch user with id: ".$userId);
     }
 
@@ -233,7 +233,6 @@ function registerUser($request, $response, $arguments) {
     }
 
     return respond($response, $status, "", $data);
-
 }
 
 function addUpdatePicture($request, $response, $arguments) {
@@ -256,9 +255,9 @@ function updatePassword($request, $response, $arguments) {
         $query->bindParam(":newPassword", $newPassword);
 
         if (!$query->execute()) {
-            return respond($response, 400, "failed to change password"); }
+            return respond($response, 400, "failed to change password", (object)array()); }
     } else {
-        return respond($response, 400, "password invalid");
+        return respond($response, 400, "password invalid", (object)array());
     }
 
     $data = $userId;
@@ -276,13 +275,13 @@ function test($request, $response, $arguments) {
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
-function respond($response, $status, $message="", $data=(object)array()) {
+function respond($response, $status, $message, $data) {
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
-        ->write(jsonifyWithMessage($data, $message));
+        ->write(jsonifyWithMessage($message, $data));
 }
 
-function jsonifyWithMessage($message="", $data=(object)array()) {
+function jsonifyWithMessage($message, $data) {
     $data->message=$message;
     return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 }
