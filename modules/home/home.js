@@ -1,20 +1,19 @@
-angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService, $timeout, uiGmapGoogleMapApi, uiGmapIsReady){
-    
+angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService,
+                                                     $timeout, uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
+
     // Variables
     var ctrl = this;
-    $scope.cat = {};
-    $scope.cat.selected = undefined;
-    ctrl.filterSelected = '';
+    $scope.cat = {selected: undefined};
     $scope.map = {};
     $scope.markers = [];
     ctrl.currentUser = {};
     $scope.categories = [];
     ctrl.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
     ctrl.defaultRadius = 0.3;
-    
+
     // Settings, Checks
     $rootScope.$broadcast('updateNav', {});
-    
+
     // Function Definitions
     ctrl.createMarkers = function (center) {
         apiService.getMarkers({
@@ -28,39 +27,30 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                 }
             },
             function (success) {
-                //if (ctrl.filterSelected !== '') {
-                //    var data = angular.fromJson(success);
-                //    var filtered = data.filter(function (element) {
-                //        if (element) {}
-                //    });
-                //    $scope.markers = angular.fromJson(success);
-                //}
-                $scope.$watch($scope.active, function() {
-                    $timeout(function () {
-                        uiGmapIsReady.promise().then(function () {
-                            var temp = angular.fromJson(success);
-                            if($scope.cat.selected !== undefined) {
-                                // Filtering
-                                $scope.markers = temp.filter(function (e) {
-                                    e.id = e.userId;
-                                    e.coords = {latitude: e.latitude, longitude: e.longitude};
-                                    return e.lessons.some(function (e2) {
-                                        return ($scope.cat.selected.categoryName === e2.categoryName);
-                                    });
+                $timeout(function () {
+                    uiGmapIsReady.promise().then(function () {
+                        var temp = angular.fromJson(success);
+                        if($scope.cat.selected !== undefined) {
+                            // Filtering
+                            $scope.markers = temp.filter(function (e) {
+                                e.id = e.userId;
+                                e.coords = {latitude: e.latitude, longitude: e.longitude};
+                                e.show = false;
+                                return e.lessons.some(function (e2) {
+                                    return ($scope.cat.selected.categoryName === e2.categoryName);
                                 });
-                            } else {
-                                // Not filtering
-                                $scope.markers = temp.map(function (e) {
-                                    e.id = e.userId;
-                                    e.coords = {latitude: e.latitude, longitude: e.longitude};
-                                    return e;
-                                });
-                            }
-                        });
-                    }, 0);
-                });
-
-
+                            });
+                        } else {
+                            // Not filtering
+                            $scope.markers = temp.map(function (e) {
+                                e.id = e.userId;
+                                e.coords = {latitude: e.latitude, longitude: e.longitude};
+                                e.show = false;
+                                return e;
+                            });
+                        }
+                    });
+                }, 0);
             },
             function (error) {
                 console.error('Keine Markers gefunden');
@@ -81,19 +71,10 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             controls: {
 
             },
-            markersEvents: {
-                click: function(marker, eventName, model) {
-                    $scope.map.window.model = model;
-                    $scope.map.window.show = true;
+            markerEvents: {
+                goTo: function (id) {
+                    ctrl.goTo(id);
                 }
-            },
-            window: {
-                marker: {},
-                show: false,
-                closeClick: function() {
-                    this.show = false;
-                },
-                options: {}
             },
             events: {
                 dragend: function (mapModel, eventName, originalEventArgs) {
@@ -123,6 +104,26 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             }
         );
     };
+
+    $scope.markerClick = function (marker) {
+        if(marker.show) {
+            marker.show = false;
+        } else {
+            _.forEach($scope.markers, function(curMarker) {
+                curMarker.show = false;
+            });
+            marker.show = true;
+        }
+    };
+
+    $scope.markerClose = function (marker) {
+        marker.show = false;
+    };
+
+    $scope.goTo = function (id) {
+        $state.go('overview', {id: id});
+    };
+
 
     // Function Calls
     ctrl.getCategoryList();

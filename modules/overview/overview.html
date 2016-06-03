@@ -1,33 +1,35 @@
 <div class="container" ng-controller="OverviewCtrl">
 
-    <table class="table">
-        <tr>
-            <td>Name</td>
-            <td>{{user.firstname}} {{user.lastname}}</td>
-        </tr>
-        <tr>
-            <td>E-Mail</td>
-            <td>{{user.email}}</td>
-        </tr>
-        <tr>
-            <td>Strasse</td>
-            <td>{{user.streetName}} {{user.streetNr}}</td>
-        </tr>
-        <tr>
-            <td>Ort</td>
-            <td>{{user.postalCode}} {{user.place}}</td>
-        </tr>
-    </table>
+    <div class="well">
+        <table class="table">
+            <tr>
+                <td><b>Name</b></td>
+                <td>{{user.firstname}} {{user.lastname}}</td>
+            </tr>
+            <tr>
+                <td><b>E-Mail</b></td>
+                <td>{{user.email}}</td>
+            </tr>
+            <tr>
+                <td><b>Strasse</b></td>
+                <td>{{user.streetName}} {{user.streetNr}}</td>
+            </tr>
+            <tr>
+                <td><b>Ort</b></td>
+                <td>{{user.postalCode}} {{user.place}}</td>
+            </tr>
+        </table>
 
-    <table class="table">
-        <thead>
-        <th>Name</th>
-        </thead>
-        <tbody>
-        <tr ng-repeat="lesson in user.lessons">
-            <td>{{lesson.categoryName}}</td>
-        </tr>
-        </tbody>
-    </table>
+        <table class="table">
+            <thead>
+            <th>Name</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="lesson in user.lessons">
+                <td>{{lesson.categoryName}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
 </div>

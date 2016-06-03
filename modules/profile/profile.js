@@ -1,15 +1,16 @@
-angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService, actionService) {
+angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService,
+                                                          actionService, $rootScope) {
 
     // Variables
     var ctrl = this;
-    $scope.user = {name: ""};
+    $scope.user = {name: "", userId: actionService.getCurrentId(store.get('token'))};
     $scope.actualTab = 'address';
     $scope.avatarDefault = 'assets/defaultUser.jpg';
     $scope.avatar64 = {base64: ''};
     $scope.selectedCategory = 1;
     $scope.newLessons = [];
     $scope.categories = [];
-    
+
     // Settings, Checks
     $scope.loggedIn = actionService.checkLoginState(store.get('token'));
     if (!$scope.loggedIn) {
@@ -17,7 +18,7 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     }
 
     $rootScope.$broadcast('updateNav', {});
-    
+
     // Function Definitions
     $scope.getCategoryList = function () {
         apiService.getCategories(
@@ -31,12 +32,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     };
 
     $scope.getMyData = function () {
-        apiService.getUser(1,
+        apiService.getUser($scope.user.userId,
             function (success) {
-                var data = angular.fromJson(success);
-                console.log(data.name);
-                $scope.user = data;
-                console.log(data.lessons);
+                $scope.user = angular.fromJson(success);
             },
             function (error) {
                 console.log(error);
@@ -65,14 +63,16 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     };
 
     $scope.save = function () {
-        apiService.updateUser(1, $scope.user,
+        apiService.updateUser($scope.user.userId, $scope.user,
             function(success){
                 //TODO Meldungen auf Bildschirm
                 console.log('success!');
+                console.log(success);
             },
             function (error) {
                 //TODO Meldungen auf Bildschirm
                 console.log('error!');
+                console.log(error);
             });
 
         for (var i = 0; i < $scope.newLessons.length; i++){
@@ -84,12 +84,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
         }
         $scope.user.lessons = $scope.user.lessons.concat($scope.newLessons);
         $scope.newLessons = [];
-
-        console.log($scope.user.lessons);
     };
 
 // Function Calls
     $scope.getMyData();
     $scope.getCategoryList();
-})
-;
+});

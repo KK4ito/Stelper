@@ -53,21 +53,29 @@
                         options="map.options"
                         control="map.control">
 
-        <ui-gmap-window
-            show="map.window.show"
-            coords="map.window.model"
-            options="map.window.options"
-            closeClick="map.window.closeClick()"
-            templateParameter="map.window.marker">
-            <div>
-                {{ parameter.id }}
-            </div>
-        </ui-gmap-window>
+        <ui-gmap-marker ng-repeat="marker in markers"
+                        coords="marker.coords"
+                        click="markerClick(marker)"
+                        idKey="marker.id">
 
-        <ui-gmap-markers models="markers"
-                         coords="'self'"
-                         events="map.markersEvents">
-        </ui-gmap-markers>
+            <ui-gmap-window
+                show="marker.show"
+                closeClick="markerClose(marker)"
+                ng-cloak="ng-cloak">
+                <table>
+                    <tr>
+                        <td>{{ marker.firstname }} {{ marker.lastname }}</td>
+                    </tr>
+                    <tr>
+                        <td><button class="btn btn-info" ng-click="$parent.goTo(marker.id)">
+                            <i class="glyphicon glyphicon-user glyphicon-light"></i>
+                        </button></td>
+                    </tr>
+                </table>
+            </ui-gmap-window>
+
+        </ui-gmap-marker>
+
     </ui-gmap-google-map>
 
 </div>

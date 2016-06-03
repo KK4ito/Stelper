@@ -13,6 +13,7 @@
 //-------------------------------------------------//
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: POST, GET, PUT');
 
 //-------------------------------------------------//
 // Imports
@@ -39,7 +40,7 @@ define('DB_NAME', 'stelper');
 $app = new \Slim\App();
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/login", "/register", "/test", "/users", "/categories"],
+    "passthrough" => ["/login", "/register", "/testing", "/users", "/categories"],
     "secure" => false,
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
@@ -52,14 +53,13 @@ $app->post('/register', 'registerUser');
 
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
-$app->get('/test', 'getTest');
 $app->get('/categories', 'getCategories');
 
 $app->put('/users/{id}', 'updateUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
 $app->put('/users/{id}/password', 'updatePassword');
 
-$app->delete('/users/{id}', 'deleteUser');
+//$app->delete('/users/{id}', 'deleteUser');
 
 $app->run();
 
@@ -154,11 +154,6 @@ function getUsers($request, $response, $arguments) {
     }
 
     return respond($response, 200, "", $data);
-}
-
-function getTest($request, $response, $arguments) {
-    $params = json_decode($request->getBody() ) ?: $request->getParams();
-    var_dump($params);
 }
 
 function getUser($request, $response, $arguments) {
@@ -269,21 +264,68 @@ function updatePassword($request, $response, $arguments) {
 }
 
 function updateUser($request, $response, $arguments) {
+    $params = json_decode($request->getBody() ) ?: $request->getParams();
+    $pdoMySql = getConnection();
+
     // update user
+    $userId     = htmlspecialchars($arguments["id"]);
+    $email      = htmlspecialchars($params->email);
+    $firstname  = htmlspecialchars($params->firstname);
+    $lastname   = htmlspecialchars($params->lastname);
+    $streetName = htmlspecialchars($params->streetName);
+    $streetNr   = htmlspecialchars($params->streetNr);
+    $postalCode = htmlspecialchars($params->postalCode);
+    $place      = htmlspecialchars($params->place);
+
+    $query = "UPDATE `users`
+                    SET firstname=:firstname,
+                        lastname=:lastname,
+                        streetName=:streetName,
+                        streetNr=:streetNr,
+                        postalCode=:postalCode,
+                        place=:place
+                        WHERE userId = :userId";
+    $query = $pdoMySql->prepare($query);
+    $query->bindParam(":userId", $userId);
+    //$query->bindParam(":email", $email);
+    $query->bindParam(":firstname", $firstname);
+    $query->bindParam(":lastname", $lastname);
+    $query->bindParam(":streetName", $streetName);
+    $query->bindParam(":streetNr", $streetNr);
+    $query->bindParam(":postalCode", $postalCode);
+    $query->bindParam(":place", $place);
+
+    if (!$query->execute()) {
+        return respond($response, 400, "failed to update user 1", $query->errorInfo());
+    }
 
     // delete lessons from user
+    $query = "DELETE FROM `lessons` WHERE userId = :userId";
+    $query = $pdoMySql->prepare($query);
+    $query->bindParam(":userId", $userId);
+
+    if (!$query->execute()) {
+        return respond($response, 400, "failed to update user 2", $query->errorInfo());
+    }
 
     // add new lessons from user
+    $lessons = $params->lessons;
 
+    foreach($lessons as $lesson) {
+        $query = "INSERT INTO `lessons` (`userId`,`categoryId`,`visible`) 
+                    VALUES (:userId, :categoryId, :visible)";
+        $query = $pdoMySql->prepare($query);
+        $query->bindParam(":userId", $userId);
+        $query->bindParam(":categoryId", $lesson->categoryId);
+        $query->bindParam(":visible", $lesson->visible);
+        if (!$query->execute()) {
+            return respond($response, 400, "failed to update user 3", $query->errorInfo());
+        }
+    }
+
+    return respond($response, 200, "", (object)array());
 }
 
-/* // Achtung es besteht bereits eine test route
-function test($request, $response, $arguments) {
-    return $response->withStatus(201)
-        ->withHeader('Content-Type', 'text/html')
-        ->write('Hello World');
-}
-*/
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
@@ -344,11 +386,12 @@ function generateToken($request) {
         $future = new DateTime('now +120 minutes'); // need to be changed to 1 day or more
         $server = $request->getServerParams();
         $jti = base_convert(random_bytes(16),2,62);
+        $sub = getCurrentUserId($data['email'], $data['password']);
         $payload = [
             'iat' => $now->getTimeStamp(),
             'exp' => $future->getTimeStamp(),
             'jti' => $jti,
-            'sub' => getCurrentUserId($data['email'], $data['password'])
+            'sub' => $sub
         ];
         $secret = 'supersecretkeyyoushouldnotcommittogithub';
         $token = JWT::encode($payload, $secret, 'HS256');
@@ -367,11 +410,10 @@ function getCurrentUserId($email, $password) {
     $emailescaped = htmlspecialchars($email);
     $passwordescaped = htmlspecialchars($password);
     $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
-    $result = $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
-    $json = json_encode($result);
-    $id = $json->userId;
+    $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
+    $result = $query->fetch(PDO::FETCH_ASSOC);
 
-    return $id;
+    return $result["userId"];
 }
 
 function checkUser($email, $password) {
