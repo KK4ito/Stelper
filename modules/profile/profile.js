@@ -1,11 +1,5 @@
 angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService, actionService) {
 
-    // Settings, Checks
-    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
-    if (!$scope.loggedIn) {
-        $state.go('login');
-    }
-
     // Variables
     var ctrl = this;
     $scope.user = {name: ""};
@@ -15,7 +9,15 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     $scope.selectedCategory = 1;
     $scope.newLessons = [];
     $scope.categories = [];
+    
+    // Settings, Checks
+    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
+    if (!$scope.loggedIn) {
+        $state.go('login');
+    }
 
+    $rootScope.$broadcast('updateNav', {});
+    
     // Function Definitions
     $scope.getCategoryList = function () {
         apiService.getCategories(
@@ -62,18 +64,32 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
         $scope.user.lessons.splice(index, 1);
     };
 
-$scope.save = function () {
-    //TODO Gebe den newLessons Objekten den categoryName entsprechend einem Vergleich mit der categoryId in categories.
-    // Das muss gemacht werden da wir von einem Select Element nur die value erhalten aber nicht den namen.
+    $scope.save = function () {
+        apiService.updateUser(1, $scope.user,
+            function(success){
+                //TODO Meldungen auf Bildschirm
+                console.log('success!');
+            },
+            function (error) {
+                //TODO Meldungen auf Bildschirm
+                console.log('error!');
+            });
 
-    // TODO pushe neue lessons in user.lessons array (z.B. mit forEach)
+        for (var i = 0; i < $scope.newLessons.length; i++){
+            for (var j = 0; j < $scope.categories.length; j++){
+                if ($scope.categories[j].categoryId === $scope.newLessons[i].categoryId){
+                    $scope.newLessons[i].categoryName = $scope.categories[j].categoryName;
+                }
+            }
+        }
+        $scope.user.lessons = $scope.user.lessons.concat($scope.newLessons);
+        $scope.newLessons = [];
 
-    // TODO Rufe Rest api auf um user objekt zu speichern in Datenbank
-    // TODO Daten durch Klick auf Button speichern in DB
-};
+        console.log($scope.user.lessons);
+    };
 
 // Function Calls
-$scope.getMyData();
-$scope.getCategoryList();
+    $scope.getMyData();
+    $scope.getCategoryList();
 })
 ;
