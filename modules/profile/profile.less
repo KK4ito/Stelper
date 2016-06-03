@@ -33,10 +33,12 @@ div.upload .glyphicon.glyphicon-edit {
 div.upload:hover .glyphicon.glyphicon-edit {
     font-size: 50px;
 }
+
 div.upload:hover input {
     margin-top: -144px !important;
     cursor: pointer;
 }
+
 div.upload:hover {
     background-color: rgba(188, 189, 191, 0.5);
 }
@@ -55,6 +57,7 @@ div.upload:hover {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+
 .card.hovercard {
   position: relative;
   padding-top: 0;
@@ -63,9 +66,11 @@ div.upload:hover {
   background-color: #fff;
   background-color: rgba(255, 255, 255, 1);
 }
+
 .card.hovercard .card-background {
   height: 288px;
 }
+
 .card-background img {
   -webkit-filter: blur(25px);
   -moz-filter: blur(25px);
@@ -76,12 +81,14 @@ div.upload:hover {
   margin-top: -200px;
   min-width: 130%;
 }
+
 .card.hovercard .useravatar {
   position: absolute;
   top: 15px;
   left: 0;
   right: 0;
 }
+
 .card.hovercard .useravatar img {
   width: 250px;
   height: 250px;
@@ -92,12 +99,14 @@ div.upload:hover {
   border-radius: 50%;
   border: 5px solid rgba(255, 255, 255, 0.5);
 }
+
 .card.hovercard .card-info {
   position: absolute;
   bottom: 14px;
   left: 0;
   right: 0;
 }
+
 .card.hovercard .card-info .card-title {
   padding:0 5px;
   font-size: 20px;
@@ -108,6 +117,7 @@ div.upload:hover {
   -moz-border-radius: 4px;
   border-radius: 4px;
 }
+
 .card.hovercard .card-info {
   overflow: hidden;
   font-size: 12px;
@@ -115,10 +125,12 @@ div.upload:hover {
   color: #737373;
   text-overflow: ellipsis;
 }
+
 .card.hovercard .bottom {
   padding: 0 20px;
   margin-bottom: 17px;
 }
+
 .btn-pref .btn {
   -webkit-border-radius:0 !important;
 }
@@ -145,7 +157,7 @@ div.upload:hover {
   height: 100px;
 }
 
-.UserProfile{
+.UserProfile .well{
   margin-bottom: 80px;
 }
 
@@ -193,32 +205,17 @@ button#address, button#privateLessons {
 }
 
 /*form*/
-.form-inline{
+.form-inline#addressForm {
   margin: 20px;
 }
 
-.form-group{
+#addressForm .form-group{
   margin: 20px;
 }
 
-#firstname, #street, #postcode{
+#firstname, #street, #postcode, #name, #houseNumber, #city{
   width: 100px;
 }
 
-#name, #houseNumber, #city{
-  width: 100px;
-}
 
-.glyphicon-floppy-save:hover{
-  background-color: @main-color-2;
-}
-
-button#save-button:hover{
-  background-color: @main-color-3;
-  border-color: @main-color-2;
-}
-
-button#save-button:hover .glyphicon{
-  color: black;
-}
 
