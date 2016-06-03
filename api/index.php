@@ -167,7 +167,7 @@ function getUser($request, $response, $arguments) {
 
     if(!$query->execute()) {
         $data = (object) array();
-        return respond($response, 400, $data, "failed to fetch user with id: ".$userId);
+        return respond($response, 400, "failed to fetch user with id: ".$userId);
     }
 
     // Get all user but no lessons
@@ -182,8 +182,7 @@ function getUser($request, $response, $arguments) {
     $query->bindParam(":userId", $userId);
 
     if (!$query->execute()) {
-        $data = (object) array();
-        return respond($response, 400, $data, "failed to fetch lessons for userId: ".$userId);
+        return respond($response, 400, "failed to fetch lessons for userId: ".$userId);
     }
 
     // Get all lessons of a user
@@ -223,7 +222,7 @@ function registerUser($request, $response, $arguments) {
     $query->bindParam(":password", htmlspecialchars($data["password"]));
 
     if(!$query->execute()) {
-        return respond($response, 400, $query->errorInfo(), "failed to register new user");
+        return respond($response, 400, "failed to register new user", $query->errorInfo());
     } else {
         $gen = generateToken($request);
         $lastInsertId = $pdomysql->lastInsertId();
@@ -233,7 +232,7 @@ function registerUser($request, $response, $arguments) {
         $data["status"] = $gen["status"];
     }
 
-    return respond($response, $status, $data);
+    return respond($response, $status, "", $data);
 
 }
 
