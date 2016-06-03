@@ -72,9 +72,15 @@
                     </button>
                 </div><!-- end tab1 -->
                 <div class="tab-pane fade in" id="tab2">
-                    <h3>Meine Nachhilfe</h3> <!--TODO Nachhilfe, löschen + sichtbar (oder nicht)-->
+                    <h3>Meine Nachhilfe</h3> <!--TODO Nachhilfe sichtbar (oder nicht)-->
 
                     <table class="table">
+                        <thead ng-if="(user.lessons.length + newLessons.length)">
+                        <th>Sichtbarkeit</th>
+                        <th>Löschen</th>
+                        <th>Auswahl</th>
+                        </thead>
+                        <tbody>
                         <tr ng-repeat="lesson in user.lessons">
                             <td class="col col-xs-1">
                                 <input type="checkbox"
@@ -104,9 +110,11 @@
                                 </select>
                             </td>
                         </tr>
+                        </tbody>
                     </table>
-                    <button ng-if="categories.length != (user.lessons.length + newLessons.length)" ng-click="addLesson()" class="btn btn-block btn-success">Füge eine neue Nachhilfe hinzu</button>
-                </div>
+                    <button ng-if="categories.length != (user.lessons.length + newLessons.length)" ng-click="addLesson()"
+                          class="btn btn-block btn-success">Füge eine neue Nachhilfe hinzu</button>
+
             </div>
         </div>
     </div>
