@@ -125,7 +125,7 @@ function getUsers($request, $response, $arguments) {
     } }
 
     // Got all users but no lessons
-    if(!$query->execute()) { return $response ->withStatus(400); }
+    if(!$query->execute()) { return respond($response, 400, "failed to fetch all users"); }
 
     $data = $query->fetchAll();
 
@@ -167,7 +167,10 @@ function getUser($request, $response, $arguments) {
     $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `users`.`userId`=:userId");
     $query->bindParam(":userId", $userId);
 
-    if(!$query->execute()) { return $response->withStatus(400); }
+    if(!$query->execute()) {
+        $data = (object) array();
+        return respond($response, 400, $data, "failed to fetch user with id: ".$userId);
+    }
 
     // Get all user but no lessons
     $data = $query->fetch();
@@ -180,16 +183,17 @@ function getUser($request, $response, $arguments) {
                                           WHERE `lessons`.`userId` = :userId");
     $query->bindParam(":userId", $userId);
 
-    if (!$query->execute()) { return $response->withStatus(400); }
+    if (!$query->execute()) {
+        $data = (object) array();
+        return respond($response, 400, $data, "failed to fetch lessons for userId: ".$userId);
+    }
 
     // Get all lessons of a user
     $lessons = $query->fetchAll();
     // store all lessons into a new key
     $data["lessons"] = $lessons;
 
-    return $response->withStatus(200)
-        ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    return respond($response, 200, "", $data);
 }
 
 /*function deleteUser($request, $response, $arguments) {
@@ -204,9 +208,7 @@ function getUser($request, $response, $arguments) {
 function login($request, $response, $arguments) {
     $data = generateToken($request);
 
-    return $response->withStatus($data['code'])
-        ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    return jsonifyWithMessage($response, $data['code'], $data);
 }
 
 function registerUser($request, $response, $arguments) {
@@ -223,9 +225,7 @@ function registerUser($request, $response, $arguments) {
     $query->bindParam(":password", htmlspecialchars($data["password"]));
 
     if(!$query->execute()) {
-        return $response->withStatus(400)
-            ->withHeader('Content-Type', 'application/json')
-            ->write(json_encode($query->errorInfo(), JSON_UNESCAPED_SLASHES));
+        return respond($response, 400, $query->errorInfo(), "failed to register new user");
     } else {
         $gen = generateToken($request);
         $lastInsertId = $pdomysql->lastInsertId();
@@ -235,9 +235,7 @@ function registerUser($request, $response, $arguments) {
         $data["status"] = $gen["status"];
     }
 
-    return $response->withStatus($status)
-        ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    return respond($response, $status, $data);
 
 }
 
@@ -260,21 +258,15 @@ function updatePassword($request, $response, $arguments) {
         $query->bindParam(":userId", $userId);
         $query->bindParam(":newPassword", $newPassword);
 
-        if (!$query->execute()) { return $response->withStatus(400)
-            ->withHeader('Content-Type', 'application/json')
-            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)); }
+        if (!$query->execute()) {
+            return respond($response, 400, "failed to change password"); }
     } else {
-        $data = (object) array();
-        return $response->withStatus(400)
-            ->withHeader('Content-Type', 'application/json')
-            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        return respond($response, 400, "password invalid");
     }
 
     $data = $userId;
 
-    return $response->withStatus(200)
-        ->withHeader('Content-Type', 'application/json')
-        ->write(jsonifyWithMessage($data, ""));
+    return respond($response, 200, "", $data);
 }
 
 /* // Achtung es besteht bereits eine test route
@@ -287,13 +279,13 @@ function test($request, $response, $arguments) {
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
-function respond($response, $status, $data, $message) {
+function respond($response, $status, $message="", $data=(object)array()) {
     $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
         ->write(jsonifyWithMessage($data, $message));
 }
 
-function jsonifyWithMessage($data, $message) {
+function jsonifyWithMessage($message="", $data=(object)array()) {
     $data->message=$message;
     return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 }
