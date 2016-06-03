@@ -11,7 +11,7 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
     $scope.login = function() {
         if(Object.keys($scope.loginUser).length === 2) {
             apiService.login(
-                {username: $scope.loginUser.username, password: md5.createHash($scope.loginUser.password)},
+                {email: $scope.loginUser.email, password: md5.createHash($scope.loginUser.password)},
                 function(success, status) {
                     var data = angular.fromJson(success);
                     store.set('token', data.token);
