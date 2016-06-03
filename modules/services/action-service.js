@@ -38,7 +38,8 @@ angular.module('app').service('actionService',['jwtHelper','$q','$window', funct
 
     this.getCurrentId = function (token) {
         var tok = jwtHelper.decodeToken(token);
+        console.log(tok);
         return tok.sub;
-    }
+    };
 
 }]);

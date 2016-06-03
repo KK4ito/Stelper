@@ -1,4 +1,4 @@
-angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService, $timeout, uiGmapGoogleMapApi, uiGmapIsReady){
+angular.module('app').controller('HomeCtrl',function(store, $scope, $state, actionService, apiService, $timeout, uiGmapGoogleMapApi, uiGmapIsReady){
 
     // Settings, Checks
 
@@ -79,6 +79,20 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             },
             controls: {
 
+            },
+            markersEvents: {
+                click: function(marker, eventName, model) {
+                    $scope.map.window.model = model;
+                    $scope.map.window.show = true;
+                }
+            },
+            window: {
+                marker: {},
+                show: false,
+                closeClick: function() {
+                    this.show = false;
+                },
+                options: {}
             },
             events: {
                 dragend: function (mapModel, eventName, originalEventArgs) {

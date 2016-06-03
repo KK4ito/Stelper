@@ -52,7 +52,21 @@
                         zoom="map.zoom"
                         options="map.options"
                         control="map.control">
-        <ui-gmap-markers models="markers" coords="'self'">
+
+        <ui-gmap-window
+            show="map.window.show"
+            coords="map.window.model"
+            options="map.window.options"
+            closeClick="map.window.closeClick()"
+            templateParameter="map.window.marker">
+            <div>
+                {{ parameter.id }}
+            </div>
+        </ui-gmap-window>
+
+        <ui-gmap-markers models="markers"
+                         coords="'self'"
+                         events="map.markersEvents">
         </ui-gmap-markers>
     </ui-gmap-google-map>
 

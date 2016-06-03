@@ -49,14 +49,17 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 //-------------------------------------------------//
 $app->post('/login', 'login');
 $app->post('/register', 'registerUser');
-//$app->get('/test', 'test');
+
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
-$app->delete('/users/{id}', 'deleteUser');
-$app->put('/users/{id}/picture', 'addUpdatePicture');
-$app->put('/users/{id}/password', 'updatePassword');
 $app->get('/test', 'getTest');
 $app->get('/categories', 'getCategories');
+
+$app->put('/users/{id}', 'updateUser');
+$app->put('/users/{id}/picture', 'addUpdatePicture');
+$app->put('/users/{id}/password', 'updatePassword');
+
+$app->delete('/users/{id}', 'deleteUser');
 
 $app->run();
 
@@ -265,6 +268,15 @@ function updatePassword($request, $response, $arguments) {
     return respond($response, 200, "", $data);
 }
 
+function updateUser($request, $response, $arguments) {
+    // update user
+
+    // delete lessons from user
+
+    // add new lessons from user
+
+}
+
 /* // Achtung es besteht bereits eine test route
 function test($request, $response, $arguments) {
     return $response->withStatus(201)
@@ -356,7 +368,8 @@ function getCurrentUserId($email, $password) {
     $passwordescaped = htmlspecialchars($password);
     $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
     $result = $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
-    $id = $result->userId;
+    $json = json_encode($result);
+    $id = $json->userId;
 
     return $id;
 }

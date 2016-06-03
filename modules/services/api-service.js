@@ -146,7 +146,7 @@ angular.module('app').service('apiService',['$http', function($http) {
             '&northeastlat=' + data.northeast.latitude
         ).success(success).error(error);
     };
-    
+
     service.getCategories = function (success,error) {
         $http.get(
             BASE_API + '/categories'

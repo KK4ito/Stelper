@@ -33,6 +33,10 @@ angular.module('app').config(function($httpProvider, $urlRouterProvider, $stateP
         url: '/help',
         templateUrl: 'modules/help/help.html'
     });
+    $stateProvider.state('overview', {
+        url: '/user/:id',
+        templateUrl: 'modules/overview/overview.html'
+    });
     /* Add New States Above */
     $urlRouterProvider.otherwise('/home');
 
