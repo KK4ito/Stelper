@@ -36,4 +36,9 @@ angular.module('app').service('actionService',['jwtHelper','$q','$window', funct
         return !(token === 'undefined' || token === null || jwtHelper.isTokenExpired(token));
     };
 
+    this.getCurrentId = function (token) {
+        var tok = jwtHelper.decodeToken(token);
+        return tok.sub;
+    }
+
 }]);

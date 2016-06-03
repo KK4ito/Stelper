@@ -288,7 +288,7 @@ function generateToken($request) {
             'iat' => $now->getTimeStamp(),
             'exp' => $future->getTimeStamp(),
             'jti' => $jti,
-            'sub' => $server['PHP_AUTH_USER']
+            'sub' => getCurrentUserId($data['email'], $data['password'])
         ];
         $secret = 'supersecretkeyyoushouldnotcommittogithub';
         $token = JWT::encode($payload, $secret, 'HS256');
@@ -301,6 +301,17 @@ function generateToken($request) {
 
 
     return $data;
+}
+
+function getCurrentUserId($email, $password) {
+    $pdomysql = getConnection();
+    $emailescaped = htmlspecialchars($email);
+    $passwordescaped = htmlspecialchars($password);
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `email` = :email AND `password` = :password");
+    $result = $query->execute(array('email' => $emailescaped, 'password' => $passwordescaped));
+    $id = $result->userId;
+
+    return $id;
 }
 
 function checkUser($email, $password) {
