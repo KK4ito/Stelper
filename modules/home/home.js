@@ -1,7 +1,5 @@
 angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService, $timeout, uiGmapGoogleMapApi, uiGmapIsReady){
-
-    // Settings, Checks
-
+    
     // Variables
     var ctrl = this;
     $scope.cat = {};
@@ -13,7 +11,10 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     $scope.categories = [];
     ctrl.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
     ctrl.defaultRadius = 0.3;
-
+    
+    // Settings, Checks
+    $rootScope.$broadcast('updateNav', {});
+    
     // Function Definitions
     ctrl.createMarkers = function (center) {
         apiService.getMarkers({
