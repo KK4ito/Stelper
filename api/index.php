@@ -114,14 +114,15 @@ function getUsers($request, $response, $arguments) {
         $query->bindParam(":southwestlat", $southwestlat, PDO::PARAM_STR);
         $query->bindParam(":southwestlng", $southwestlng, PDO::PARAM_STR);
 
-    } else { if(!(isset($northeastlat) || isset($northeastlng)
+    } else {
+        if(!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
             || isset($lat) || isset($lng))) {
 
             // use sqlUsers statement without filter
             $query = $pdoUsers->prepare($sqlUsers);
         } else {
-            return $response->withStatus(400);
+            return respind($response, 400, "all parameters in arguments must be set");
     } }
 
     // Got all users but no lessons
@@ -141,17 +142,14 @@ function getUsers($request, $response, $arguments) {
                                           AND `lessons`.visible = 1");
         $query->bindParam(":userId", $userId);
 
-        if (!$query->execute()) { return $response->withStatus(400); }
+        if (!$query->execute()) { return respond($response, 400, "failed to fetch lessons for user with id: ".$userId); }
 
         $lessons = $query->fetchAll();
         $user["lessons"] = $lessons;
         $data[$key] = $user; // assign changes user to old key in $result
     }
 
-    return $response
-        ->withStatus(200)
-        ->withHeader('Content-Type', 'application/json')
-        ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    return respond($response, 200, "", $data);
 }
 
 function getTest($request, $response, $arguments) {
@@ -208,7 +206,7 @@ function getUser($request, $response, $arguments) {
 function login($request, $response, $arguments) {
     $data = generateToken($request);
 
-    return jsonifyWithMessage($response, $data['code'], $data);
+    return respond($response, $data['code'], "", $data);
 }
 
 function registerUser($request, $response, $arguments) {
@@ -280,7 +278,7 @@ function test($request, $response, $arguments) {
 // Helper Functions
 //-------------------------------------------------//
 function respond($response, $status, $message="", $data=(object)array()) {
-    $response->withStatus($status)
+    return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
         ->write(jsonifyWithMessage($data, $message));
 }
