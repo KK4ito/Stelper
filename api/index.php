@@ -193,14 +193,28 @@ function getUser($request, $response, $arguments) {
     return respond($response, 200, "", $data);
 }
 
-/*function deleteUser($request, $response, $arguments) {
+function deleteUser($request, $response, $arguments) {
     $userId = $arguments["id"];
-    $data = json_decode($request->getBody(), true);
+
+    //$data = json_decode($request->getBody() ) ?: $request->getParams();
 
     if(checkPassword($request, $response, $arguments)) {
+        $pdoMySql = getConnection();
 
+        $sql = "DELETE FROM `users` WHERE `users`.`userId` = :userId";
+
+        $query = $pdoMySql->prepare($sql);
+        $query->bindParam(":userId", $userId);
+
+        if (!$query->execute()) {
+            return respond($response, 400, "failed to delete the user with id".$userId, (object)array());
+        }
+    } else {
+        return respond($response, 400, "password unvalid", (object)array());
     }
-}*/
+
+    return respond($response, 201, "user ".$userId." has been deleted", (object)array());
+}
 
 function login($request, $response, $arguments) {
     $data = generateToken($request);
@@ -288,9 +302,10 @@ function jsonifyWithMessage($message, $data) {
 
 function checkPassword($request, $response, $arguments) {
     $userId = $arguments["id"];
-    $data = json_decode($request->getBody());
 
-    $oldPassword = $data->oldPassword;
+    $data = json_decode($request->getBody() ) ?: $request->getParams();
+
+    $oldPassword = $data->password;
 
     $pdoMySql = getConnection();
 
