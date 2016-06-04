@@ -50,12 +50,11 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 //-------------------------------------------------//
 $app->post('/login', 'login');
 $app->post('/register', 'registerUser');
-
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->get('/categories', 'getCategories');
-
 $app->put('/users/{id}', 'updateUser');
+$app->delete('/users/{d}', 'deleteUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
 $app->put('/users/{id}/password', 'updatePassword');
 
@@ -283,13 +282,15 @@ function updateUser($request, $response, $arguments) {
 
     // update user
     $userId     = htmlspecialchars($arguments["id"]);
-    $email      = htmlspecialchars($params->email);
+    //$email      = htmlspecialchars($params->email);
     $firstname  = htmlspecialchars($params->firstname);
     $lastname   = htmlspecialchars($params->lastname);
     $streetName = htmlspecialchars($params->streetName);
     $streetNr   = htmlspecialchars($params->streetNr);
     $postalCode = htmlspecialchars($params->postalCode);
     $place      = htmlspecialchars($params->place);
+    $latitude   = htmlspecialchars($params->latitude);
+    $longitude  = htmlspecialchars($params->longitude);
 
     $query = "UPDATE `users`
                     SET firstname=:firstname,
@@ -297,7 +298,9 @@ function updateUser($request, $response, $arguments) {
                         streetName=:streetName,
                         streetNr=:streetNr,
                         postalCode=:postalCode,
-                        place=:place
+                        place=:place,
+                        latitude=:latitude,
+                        longitude=:longitude
                         WHERE userId = :userId";
     $query = $pdoMySql->prepare($query);
     $query->bindParam(":userId", $userId);
@@ -308,12 +311,14 @@ function updateUser($request, $response, $arguments) {
     $query->bindParam(":streetNr", $streetNr);
     $query->bindParam(":postalCode", $postalCode);
     $query->bindParam(":place", $place);
+    $query->bindParam(":latitude", $latitude);
+    $query->bindParam(":longitude", $longitude);
 
     if (!$query->execute()) {
         return respond($response, 400, "failed to update user 1", $query->errorInfo());
     }
 
-    // delete lessons from user
+    // delete lessons from user before adding the new lessons
     $query = "DELETE FROM `lessons` WHERE userId = :userId";
     $query = $pdoMySql->prepare($query);
     $query->bindParam(":userId", $userId);
