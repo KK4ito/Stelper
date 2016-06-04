@@ -1,12 +1,12 @@
 angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store, $state, apiService, md5){
-
-    // Settings, Checks
-
+    
     // Variables
     $scope.loginUser = {};
     $scope.registerUser = {};
     $scope.isLogin = ($state.current.name === 'login');
-
+    
+    // Settings, Checks
+    
     // Function Definitions
     $scope.login = function() {
         if(Object.keys($scope.loginUser).length === 2) {

@@ -1,6 +1,5 @@
 angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService,
                                                           actionService, $rootScope) {
-
     // Variables
     var ctrl = this;
     $scope.user = {name: "", userId: actionService.getCurrentId(store.get('token'))};

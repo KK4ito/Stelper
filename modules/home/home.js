@@ -1,6 +1,5 @@
 angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService,
                                                      $timeout, uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
-
     // Variables
     var ctrl = this;
     $scope.cat = {selected: undefined};

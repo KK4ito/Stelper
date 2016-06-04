@@ -1,12 +1,11 @@
 angular.module('app').controller('HeaderCtrl',function($rootScope, $state, $scope, actionService,
                                                        store, $timeout){
-
-    // Settings
-
     // Variables
     $scope.loggedIn = actionService.checkLoginState(store.get('token'));
     $scope.alerts = [];
-
+    
+    // Settings
+    
     // Function Definitions
     $rootScope.$on('updateNav', function (event, args) {
         $scope.loggedIn = actionService.checkLoginState(store.get('token'));
