@@ -64,16 +64,18 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
 
     $scope.save = function () {
         apiService.updateUser($scope.user.userId, $scope.user,
-            function(success){
-                //TODO Meldungen auf Bildschirm
+            function(success, status){
+                var data = angular.fromJson(success);
+                $rootScope.$broadcast('addAlert', {type: 'success', msg: 'Daten wurden erfolgreich gespeichert'});
                 console.log('success!');
                 console.log(success);
             },
-            function (error) {
-                //TODO Meldungen auf Bildschirm
-                console.log('error!');
-                console.log(error);
-            });
+                function(error, status) {
+                    var data = angular.fromJson(error);
+                    $rootScope.$broadcast('addAlert', {type: 'danger', msg: 'Daten konnten nicht gespeichert werden'});
+                    console.log('error!');
+                    console.log(error);
+                });
 
         for (var i = 0; i < $scope.newLessons.length; i++){
             for (var j = 0; j < $scope.categories.length; j++){

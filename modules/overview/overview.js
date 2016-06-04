@@ -1,11 +1,11 @@
-angular.module('app').controller('OverviewCtrl',function($scope, apiService, actionService, $stateParams){
+angular.module('app').controller('OverviewCtrl',function($scope, apiService, actionService, $stateParams, $rootScope){
 
     // Variables
     var ctrl = this;
     $scope.user = {};
-    
-    // Settings
-    
+
+    // Settings, Checks
+    $rootScope.$broadcast('updateNav', {});
 
     // Functions definitions
     ctrl.getUser = function () {
