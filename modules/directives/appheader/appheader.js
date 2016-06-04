@@ -1,4 +1,4 @@
-angular.module('app').directive('appheader', function(store, actionService) {
+angular.module('app').directive('appheader', function() {
     return {
         // only match Attribute name
         restrict: 'A',

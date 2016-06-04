@@ -5,26 +5,77 @@
     <p>
         Du suchst Nachhilfe oder möchtest selbst gerne anbieten?
         Dann bist Du hier genau richtig!
+    </p>
+    <br>
+    <h4><b>Für Nachhilfe-Anbieter</b></h4>
+    <p>
+        Als Nachhilfe-Anbieter findest Du alle nützlichen Informationen
+        rund um Dein Profil in unserem Hilfebereich (Fragezeichen oben rechts).
         <br><br>
-        <h4><b>Für Nachhilfe-Suchende</b></h4>
+        Wenn Du Dir alles genau durchgelesen hast und Du Dich mit den Nutzungsbedingungen einverstanden
+        erklärst, freuen wir uns Dich bei uns begrüssen zu dürfen.
+        Lege gleich <a ui-sref="login">los</a> und teile Dein Weissen mit
+        anderen Studierenden!
+    </p>
+    <br>
+    <h4><b>Für Nachhilfe-Suchende</b></h4>
+    <p>
         Auf der Karte findest Du diejenigen Personen in Deiner Umgebung,
         bei denen Du Dich melden kannst, wenn Du Unterstützung brauchst.
         Mit Hilfe der Suchfunktion kannst Du nach einem bestimmten Gebiet suchen.
         Tipp einfach Dein Fach ein, zum Beispiel "Mathematik", und schon
         findest Du Leute, die Dir auf diesem Gebiet helfen können.
         <br><br>
-        <h4><b>Für Nachhilfe-Anbieter</b></h4>
-        Als Nachhilfe-Anbieter findest Du alle nützlichen Informationen
-        rund um Dein Profil in unserem Hilfebereich (Fragezeichen oben rechts).
-        <br><br>
-        Wenn Du Dir alles genau durchgelesen hast und Du Dich damit einverstanden
-        erklärst, freuen wir uns Dich bei uns begrüssen zu dürfen.
-        Lege gleich <a ui-sref="login">los</a> und teile Dein Weissen mit
-        anderen Studierenden!
     </p>
 
-    <button ng-click="test()">Klick mich falls du eingeloggt bist</button>
+    <div class="input-group">
+        <ui-select ng-model="cat.selected" theme="selectize" title="Wähle eine Kategorie" placeholder="Wähle eine Kategorie">
+            <ui-select-match placeholder="Nach welchem Fachgebiet möchtest Du suchen?">{{$select.selected.categoryName}}</ui-select-match>
+            <ui-select-choices repeat="category in categories | filter: $select.search">
+                <span ng-bind-html="category.categoryName | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+        <span class="input-group-btn">
+              <button type="button" ng-click="cat.selected = undefined" class="btn btn-danger input-group-btn-fix">
+                <span class="glyphicon glyphicon-trash"></span>
+              </button>
+        </span>
+    </div>
 
-    <ui-gmap-google-map center="map.center" zoom="map.zoom" options="options"></ui-gmap-google-map>
+
+    <br/>
+
+
+
+    <ui-gmap-google-map events="map.events"
+                        center="map.center"
+                        zoom="map.zoom"
+                        options="map.options"
+                        control="map.control">
+
+        <ui-gmap-marker ng-repeat="marker in markers"
+                        coords="marker.coords"
+                        click="markerClick(marker)"
+                        idKey="marker.id">
+
+            <ui-gmap-window
+                show="marker.show"
+                closeClick="markerClose(marker)"
+                ng-cloak="ng-cloak">
+                <table>
+                    <tr>
+                        <td>{{ marker.firstname }} {{ marker.lastname }}</td>
+                    </tr>
+                    <tr>
+                        <td><button class="btn btn-info" ui-sref="overview({id:$parent.marker.id})">
+                            <i class="glyphicon glyphicon-user glyphicon-light"></i>
+                        </button></td>
+                    </tr>
+                </table>
+            </ui-gmap-window>
+
+        </ui-gmap-marker>
+
+    </ui-gmap-google-map>
 
 </div>

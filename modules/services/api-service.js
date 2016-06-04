@@ -3,6 +3,7 @@ angular.module('app').service('apiService',['$http', function($http) {
     // CONSTANTS
     var BASE = 'http://45.62.253.219/';
     var BASE_API = 'http://45.62.253.219/api';
+    var service = this;
 
     // EXTERNAL METHODS
 
@@ -13,14 +14,14 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.login = function (data, success, error) {
+    service.login = function (data, success, error) {
         $http.post(
             BASE_API + '/login',
             data
         ).success(success).error(error);
     };
 
-    this.test = function (success, error) {
+    service.test = function (success, error) {
         $http.get(
             BASE_API + '/test'
         ).success(success).error(error);
@@ -31,7 +32,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      *
      * @param success   Pseudo callback function called when everything is done
      */
-    this.logout = function (success) {
+    service.logout = function (success) {
         $http.get(
             BASE_API + '/logout'
         );
@@ -44,7 +45,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.register = function (data, success, error) {
+    service.register = function (data, success, error) {
         $http.post(
             BASE_API + '/register',
             data
@@ -59,7 +60,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.updatePassword = function (id, data, success, error) {
+    service.updatePassword = function (id, data, success, error) {
             $http.put(
                 BASE_API + '/users/' + id + '/password',
                 data
@@ -73,9 +74,10 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.getUsers = function (filter, success, error) {
+    service.getUsers = function (filter, success, error) {
         $http.get(
-            BASE_API + '/users' + (typeof(filter) !== 'undefined' && filter != null)? '?' + filter : ''
+            BASE_API + '/users',
+            filter
         ).success(success).error(error);
     };
 
@@ -86,7 +88,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.getUser = function (id, success, error) {
+    service.getUser = function (id, success, error) {
         $http.get(
             BASE_API + '/users/' + id
         ).success(success).error(error);
@@ -100,7 +102,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.updateUser = function (id, data, success, error) {
+    service.updateUser = function (id, data, success, error) {
         $http.put(
             BASE_API + '/users/' + id,
             data
@@ -114,7 +116,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.deleteUser = function (id, success, error) {
+    service.deleteUser = function (id, success, error) {
         $http.delete(
             BASE_API + '/users/' + id
         ).success(success).error(error);
@@ -128,10 +130,26 @@ angular.module('app').service('apiService',['$http', function($http) {
      * @param success   Callback function called when request was successful
      * @param error     Callback function called when request was unsucessful
      */
-    this.uploadAvatar = function (id, data, success, error) {
+    service.uploadAvatar = function (id, data, success, error) {
         $http.put(
             BASE_API + '/users/' + id + '/picture',
             data
+        ).success(success).error(error);
+    };
+
+    service.getMarkers = function (data, success, error) {
+        $http.get(
+            BASE_API + '/users' +
+            '?southwestlng=' + data.southwest.longitude +
+            '&southwestlat=' + data.southwest.latitude +
+            '&northeastlng=' + data.northeast.longitude +
+            '&northeastlat=' + data.northeast.latitude
+        ).success(success).error(error);
+    };
+
+    service.getCategories = function (success,error) {
+        $http.get(
+            BASE_API + '/categories'
         ).success(success).error(error);
     };
 

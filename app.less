@@ -6,6 +6,7 @@
 
 /* Global LESS Variables */
 @main-color: #000000;
+@main-color-inv: #ffffff;
 @main-color-2: #60ba75;
 @main-color-3: #a8d5a5;
 @main-color-4: #bcbdbf;
@@ -19,6 +20,7 @@
 @import "modules/profile/profile.less";
 @import "modules/header/header.less";
 @import "modules/help/help.less";
+@import "modules/overview/overview.less";
 /* Add Component LESS Above */
 
 /* Required for Angular UI Bootstrap */
@@ -37,6 +39,10 @@
 //}
 
 /* Global Styles */
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .ng-hide {
+    display: none !important;
+}
+
 html, body {
   height: 100%;
   width: 100%;
@@ -61,13 +67,21 @@ footer {
     color: grey;
 }
 
+footer{
+  z-index: 100;
+}
+
 footer > p{
   padding-top: 10px;
   padding-left: 20px;
 }
 
-.glyphicon {
+.glyphicon-grey {
     color: @main-color-4;
+}
+
+.glyphicon-light {
+    color: @main-color-inv;
 }
 
 // Input validator colors
