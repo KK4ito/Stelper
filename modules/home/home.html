@@ -67,7 +67,7 @@
                         <td>{{ marker.firstname }} {{ marker.lastname }}</td>
                     </tr>
                     <tr>
-                        <td><button class="btn btn-info" ng-click="$parent.goTo(marker.id)">
+                        <td><button class="btn btn-info" ui-sref="overview({id:$parent.marker.id})">
                             <i class="glyphicon glyphicon-user glyphicon-light"></i>
                         </button></td>
                     </tr>

@@ -120,11 +120,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         marker.show = false;
     };
 
-    $scope.goTo = function (id) {
-        $state.go('overview', {id: id});
-    };
-
-
     // Function Calls
     ctrl.getCategoryList();
 
