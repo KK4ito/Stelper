@@ -1,11 +1,11 @@
 <div class="container" ng-controller="OverviewCtrl">
 <div class ="UserOverview">
     <div class="col-md-10">
-        <div class="panel"> <!--TODO: foto und name aus der Datenbank -->
+        <div class="panel"> <!--TODO: foto aus der Datenbank -->
             <img class="pic img-circle" src="http://placehold.it/120x120" alt="userPhoto">
             <div class="name"><small>{{user.firstname}} {{user.lastname}}</small></div>
         </div>
-    <div class="well">
+    <div class="well" id="userData">
         <table class="table">
             <tr>
                 <td><b>E-Mail</b></td>
@@ -31,4 +31,5 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>
