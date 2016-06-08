@@ -1,19 +1,25 @@
 angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService,
-                                                     $timeout, uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
-    // Variables
+                                                     uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
+    // VARIABLES
     var ctrl = this;
-    $scope.cat = {selected: undefined, categoryName: ''};
     $scope.map = {};
     $scope.markers = [];
-    $scope.currentUser = {};
     $scope.categories = [];
-    $scope.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
+    $scope.currentUser = {};
     $scope.defaultRadius = 0.3;
+    $scope.cat = {selected: undefined, categoryName: ''};
+    $scope.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
 
-    // Settings, Checks
+    // SETTINGS, CHECKS
     $rootScope.$broadcast('updateNav', {});
 
-    // Function Definitions
+    // FUNCTION DEFINITIONS
+
+    /**
+     * Gets all markers in a given radius
+     * 
+     * @param center Json Object position of the center of the map containing latitude and longitude
+     */
     $scope.createMarkers = function (center) {
         apiService.getMarkers({
                 southwest: {
@@ -26,7 +32,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                 }
             },
             function (success) {
-                $timeout(function () {
                     uiGmapIsReady.promise().then(function () {
                         var temp = angular.fromJson(success);
                         console.log(temp);
@@ -50,13 +55,16 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                             });
                         }
                     });
-                }, 0);
             },
             function (error) {
                 console.error('Keine Markers gefunden');
             });
     };
 
+    /**
+     * Creates a map object with a center
+     * @param center Json Object containing latitude and longitude
+     */
     $scope.createMap = function (center) {
         $scope.map = {
             center: {
@@ -84,6 +92,13 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         };
     };
 
+    /**
+     * Maps dragend event. Calls createMarkers on a dragend event to get the markers on the new position/center
+     * 
+     * @param mapModel Google Maps Object
+     * @param eventName
+     * @param originalEventArgs
+     */
     $scope.mapDragend = function (mapModel, eventName, originalEventArgs) {
         var lat = mapModel.center.lat(), lng = mapModel.center.lng();
         $scope.movedMapCenter = {moved: true, latitude: lat, longitude: lng};
@@ -94,6 +109,9 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         });
     };
 
+    /**
+     * Gets all categories
+     */
     $scope.getCategoryList = function () {
         apiService.getCategories(
             function (success) {
@@ -105,6 +123,10 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         );
     };
 
+    /**
+     * Markers click event. Opens the window of the marker.
+     * @param marker Google Maps Marker Object
+     */
     $scope.markerClick = function (marker) {
         if(marker.show) {
             marker.show = false;
@@ -116,11 +138,15 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         }
     };
 
+    /**
+     * Marker close event. Closes the window of the marker.
+     * @param marker Google Maps Marker Object
+     */
     $scope.markerClose = function (marker) {
         marker.show = false;
     };
 
-    // Function Calls
+    // FUNCTION CALLS
     $scope.getCategoryList();
 
     $scope.$watch('cat.selected', function () {

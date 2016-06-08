@@ -1,6 +1,8 @@
 angular.module('app').service('apiService',['$http', function($http) {
 
-    // CONSTANTS
+    'use strict';
+    
+    // VARIABLES
     var BASE = 'http://45.62.253.219/';
     var BASE_API = 'http://45.62.253.219/api';
     var service = this;
@@ -21,14 +23,8 @@ angular.module('app').service('apiService',['$http', function($http) {
         ).success(success).error(error);
     };
 
-    service.test = function (success, error) {
-        $http.get(
-            BASE_API + '/test'
-        ).success(success).error(error);
-    };
-
     /**
-     * Lets the user logout.
+     * Lets the user log out.
      *
      * @param success   Pseudo callback function called when everything is done
      */
@@ -137,12 +133,26 @@ angular.module('app').service('apiService',['$http', function($http) {
         ).success(success).error(error);
     };
 
+    /**
+     * Asks for the avatar of a specific user
+     * 
+     * @param id        Takes an Integer value respresenting the users Identification Number
+     * @param success   Callback function called when request was successful
+     * @param error     Callback function called when request was unsucessful
+     */
     service.getAvatar = function (id, success, error) {
         $http.get(
             BASE_API + '/users/' + id + '/picture'
         ).success(success).error(error);
     };
 
+    /**
+     * Asks for markers in a certain radius
+     * 
+     * @param data      Json object representing the bounds of the map (radius)
+     * @param success   Callback function called when request was successful
+     * @param error     Callback function called when request was unsucessful
+     */
     service.getMarkers = function (data, success, error) {
         $http.get(
             BASE_API + '/users' +
@@ -153,6 +163,12 @@ angular.module('app').service('apiService',['$http', function($http) {
         ).success(success).error(error);
     };
 
+    /**
+     * Asks for all available categories
+     *
+     * @param success   Callback function called when request was successful
+     * @param error     Callback function called when request was unsucessful
+     */
     service.getCategories = function (success,error) {
         $http.get(
             BASE_API + '/categories'

@@ -1,15 +1,19 @@
-angular.module('app').controller('OverviewCtrl',function($scope, apiService, actionService, $stateParams, $rootScope){
+angular.module('app').controller('OverviewCtrl',function($scope, apiService, $stateParams, $rootScope){
 
-    // Variables
+    // VARIABLES
     var ctrl = this;
     $scope.user = {};
     $scope.user.avatar = 'none';
 
-    // Settings, Checks
+    // SETTINGS, CHECKS
     $rootScope.$broadcast('updateNav', {});
 
-    // Functions definitions
-    ctrl.getUser = function () {
+    // FUNCTION DEFINITIONS
+
+    /**
+     * Get the requested users data
+     */
+    $scope.getUser = function () {
         apiService.getUser($stateParams.id,
         function (success) {
             $scope.user = angular.fromJson(success);
@@ -27,7 +31,7 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, act
         });
     };
 
-    // Functions run
-    ctrl.getUser();
+    // FUNCTION CALLS
+    $scope.getUser();
 
 });
