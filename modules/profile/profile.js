@@ -36,17 +36,18 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     };
 
     $scope.getMyData = function () {
+        var center;
         apiService.getUser($scope.user.userId,
             function (success) {
                 $scope.user = angular.fromJson(success);
                 if ($scope.user.latitude === 0 && $scope.user.longitude === 0) {
-                    var center = {
+                    center = {
                         latitude: 47,
                         longitude: 8
                     };
                     ctrl.createMap(center, ctrl.createmarker(center));
                 } else {
-                    var center = {
+                    center = {
                         latitude: $scope.user.latitude,
                         longitude: $scope.user.longitude
                     };
