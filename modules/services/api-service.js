@@ -137,6 +137,12 @@ angular.module('app').service('apiService',['$http', function($http) {
         ).success(success).error(error);
     };
 
+    service.getAvatar = function (id, success, error) {
+        $http.get(
+            BASE_API + '/users/' + id + '/picture'
+        ).success(success).error(error);
+    };
+
     service.getMarkers = function (data, success, error) {
         $http.get(
             BASE_API + '/users' +

@@ -3,6 +3,7 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, act
     // Variables
     var ctrl = this;
     $scope.user = {};
+    $scope.user.avatar = 'none';
 
     // Settings, Checks
     $rootScope.$broadcast('updateNav', {});
@@ -14,7 +15,15 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, act
             $scope.user = angular.fromJson(success);
         },
         function (error) {
-            
+
+        });
+        apiService.getAvatar($stateParams.id,
+        function (success) {
+            console.log(success);
+            $scope.user.avatar = angular.fromJson(success);
+        },
+        function (error) {
+            $scope.user.avatar = 'none';
         });
     };
 

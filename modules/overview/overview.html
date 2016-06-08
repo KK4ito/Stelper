@@ -1,8 +1,9 @@
 <div class="container" ng-controller="OverviewCtrl">
 <div class ="UserOverview">
     <div class="col-md-10">
-        <div class="panel"> <!--TODO: foto aus der Datenbank -->
-            <img class="pic img-circle" src="http://placehold.it/120x120" alt="userPhoto">
+        <div class="panel"> <!-- TODO: foto aus der Datenbank -->
+            <img ng-if="user.avatar != 'none'" class="pic img-circle" data-ng-src="data:image/{{user.avatar.filetype}};base64,{{user.avatar.base64}}" alt="userPhoto">
+            <img ng-if="user.avatar == 'none'" class="pic img-circle" src="assets/defaultUser.jpg" alt="userPhoto">
             <div class="name"><small>{{user.firstname}} {{user.lastname}}</small></div>
         </div>
     <div class="well" id="userData">

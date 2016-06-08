@@ -2,18 +2,15 @@
     <div class="UserProfile">
         <div class="card hovercard">
             <div class="card-background">
-                <img class="card-bkimg" alt="backgroundPhoto" ng-if="avatar64.base64 != ''"
-                     data-ng-src="data:image/{{avatar64.filetype}};base64,{{avatar64.base64}}">
-                <img class="card-bkimg" alt="backgroundPhoto" ng-if="avatar64.base64 == ''" ng-src="{{avatarDefault}}">
+                <img class="card-bkimg" alt="backgroundPhoto" ng-if="user.avatar != 'none'" data-ng-src="data:image/{{user.avatar.filetype}};base64,{{user.avatar.base64}}">
+                <img class="card-bkimg" alt="backgroundPhoto" ng-if="user.avatar == 'none'" src="assets/defaultUser.jpg">
             </div>
             <div class="useravatar">
-                <img alt="userPhoto" ng-if="avatar64.base64 != ''"
-                     data-ng-src="data:image/{{avatar64.filetype}};base64,{{avatar64.base64}}">
-                <img alt="userPhoto" ng-if="avatar64.base64 == ''" ng-src="{{avatarDefault}}">
+                <img alt="userPhoto" ng-if="user.avatar != 'none'" data-ng-src="data:image/{{user.avatar.filetype}};base64,{{user.avatar.base64}}">
+                <img alt="userPhoto" ng-if="user.avatar == 'none'" src="assets/defaultUser.jpg">
                 <div class="upload">
                     <i class="glyphicon glyphicon-edit"></i>
-                    <input on-after-validate="changeProfilePicture" type="file" ng-model="avatar64"
-                           base-sixty-four-input name="button" maxsize="1000" accept="image/jpg, image/png, image/jpeg">
+                    <input on-after-validate="changeProfilePicture" type="file" ng-model="user.avatar" base-sixty-four-input name="button" maxsize="1000" accept="image/jpg, image/png, image/jpeg">
                 </div>
             </div>
             <div class="card-info"><span class="card-title">{{ user.firstname }} {{ user.lastname }}</span>

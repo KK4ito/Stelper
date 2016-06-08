@@ -2,10 +2,12 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
                                                           actionService, $rootScope, uiGmapGoogleMapApi, uiGmapIsReady) {
     // Variables
     var ctrl = this;
-    $scope.user = {name: "", userId: actionService.getCurrentId(store.get('token'))};
+    $scope.user = {
+        name: '',
+        userId: actionService.getCurrentId(store.get('token')),
+        avatar: 'none'
+    };
     $scope.actualTab = 'address';
-    $scope.avatarDefault = 'assets/defaultUser.jpg';
-    $scope.avatar64 = {base64: ''};
     $scope.selectedCategory = 1;
     $scope.map = {};
     $scope.marker = {};
@@ -55,6 +57,13 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
             function (error) {
                 console.log(error);
             });
+        apiService.getAvatar($scope.user.userId,
+            function (success) {
+                $scope.user.avatar = angular.fromJson(success);
+            },
+            function (error) {
+                $scope.user.avatar = 'none';
+            });
     };
 
     $scope.changeTab = function (tab) {
@@ -62,7 +71,13 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     };
 
     $scope.changeProfilePicture = function () {
-        // Todo: send to server
+        apiService.uploadAvatar($scope.user.userId, $scope.user.avatar,
+            function (success) {
+                console.log("Success");
+            },
+            function (error) {
+                console.log("Error");
+            });
     };
 
     $scope.addLesson = function () {

@@ -53,6 +53,7 @@ $app->post('/register', 'registerUser');
 $app->get('/users', 'getUsers');
 $app->get('/users/{id}', 'getUser');
 $app->get('/categories', 'getCategories');
+$app->get('/users/{id}/picture', 'getPicture');
 $app->put('/users/{id}', 'updateUser');
 $app->delete('/users/{d}', 'deleteUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
@@ -247,6 +248,37 @@ function registerUser($request, $response, $arguments) {
 }
 
 function addUpdatePicture($request, $response, $arguments) {
+    $data = $request->getBody() ?: $request->getParams();
+    $userId = $arguments["id"];
+
+    $fileName = "./pic" . $userId . ".txt";
+
+    // open or create if not exists in write mode only -> deleting already existing files with same name
+
+    if(!($image = fopen($fileName, "wb")) ) {
+        return respondWith($response, 400, new stdClass(), "unable to open file");
+    }
+
+    // write data
+    if(!(fwrite($image, $data))) {
+        return respondWith($response, 400, new stdClass(), "unable to write file");
+    }
+
+    // close file
+    fclose($image);
+
+    return respond($response, 201, "picture saved", (object)array());
+}
+
+function getPicture($request, $response, $arguments) {
+    $userId = $arguments["id"];
+
+    $fileName = "./pic" . $userId . ".txt";
+    $myFile = fopen($fileName, "r") or die("Unable to open file!");
+    $data = fread($myFile,filesize($fileName));
+    fclose($myFile);
+
+    return respond($response, 200, "", $data);
 
 }
 
