@@ -1,5 +1,5 @@
 angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService,
-                                                          actionService, $rootScope) {
+                                                          actionService, $rootScope, uiGmapGoogleMapApi, uiGmapIsReady) {
     // Variables
     var ctrl = this;
     $scope.user = {name: "", userId: actionService.getCurrentId(store.get('token'))};
@@ -7,6 +7,8 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     $scope.avatarDefault = 'assets/defaultUser.jpg';
     $scope.avatar64 = {base64: ''};
     $scope.selectedCategory = 1;
+    $scope.map = {};
+    ctrl.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
     $scope.newLessons = [];
     $scope.categories = [];
 
@@ -86,8 +88,35 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
         $scope.user.lessons = $scope.user.lessons.concat($scope.newLessons);
         $scope.newLessons = [];
     };
+    
+    ctrl.createMap = function (center) {
+        $scope.map = {
+            center: {
+                latitude: center.latitude,
+                longitude: center.longitude
+            },
+            zoom: 15,
+            //markers: $scope.markers,
+            options: {
+                scrollwheel: false
+            },
+            controls: {
+
+            },
+            events: {
+                click: function (mapModel, eventName, originalEventArgs) {
+                }
+            }
+        };
+    };
+
 
 // Function Calls
     $scope.getMyData();
     $scope.getCategoryList();
+    var center = {
+        latitude: 47,
+        longitude: 8
+    };
+    ctrl.createMap(center);
 });
