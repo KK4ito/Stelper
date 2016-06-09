@@ -1,4 +1,4 @@
-angular.module('app').service('actionService',['jwtHelper','$q','$window', function(jwtHelper, $q, $window) {
+angular.module('app').service('actionService',['jwtHelper','$q','$window', '$http', function(jwtHelper, $q, $window, $http) {
 
     'use strict';
     
@@ -52,6 +52,21 @@ angular.module('app').service('actionService',['jwtHelper','$q','$window', funct
         var tok = jwtHelper.decodeToken(token);
         console.log(tok);
         return tok.sub;
+    };
+
+    /**
+     * Getting location by a given address
+     * 
+     * @param address String address from User 
+     * @param success Callback function called when request was successful
+     */
+       //TODO: finish this function
+    service.getPositionByAddress = function (address, success){
+        $http({
+            url: 'http://maps.google.com/maps/api/geocode/json?address=' + address,
+            method: 'GET',
+            skipAuthorization: true
+        }).success(success);
     };
 
 }]);

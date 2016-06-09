@@ -205,5 +205,8 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     // FUNCTION CALLS
     $scope.getMyData();
     $scope.getCategoryList();
+    actionService.getPositionByAddress('Steinenbergstrasse', function (success){
+        console.log(success);
+    });
 
 });
