@@ -1,34 +1,40 @@
 angular.module('app').controller('HomeCtrl',function($scope, $state, actionService, apiService,
-                                                     $timeout, uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
-    // Variables
+                                                     uiGmapGoogleMapApi, uiGmapIsReady, $rootScope){
+    // VARIABLES
     var ctrl = this;
-    $scope.cat = {selected: undefined};
     $scope.map = {};
     $scope.markers = [];
-    ctrl.currentUser = {};
     $scope.categories = [];
-    ctrl.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
-    ctrl.defaultRadius = 0.3;
+    $scope.currentUser = {};
+    $scope.defaultRadius = 0.3;
+    $scope.cat = {selected: undefined, categoryName: ''};
+    $scope.movedMapCenter = {moved: false, latitude: 0, longitude: 0};
 
-    // Settings, Checks
+    // SETTINGS, CHECKS
     $rootScope.$broadcast('updateNav', {});
 
-    // Function Definitions
-    ctrl.createMarkers = function (center) {
+    // FUNCTION DEFINITIONS
+
+    /**
+     * Gets all markers in a given radius
+     * 
+     * @param center Json Object position of the center of the map containing latitude and longitude
+     */
+    $scope.createMarkers = function (center) {
         apiService.getMarkers({
                 southwest: {
-                    latitude: center.latitude - ctrl.defaultRadius,
-                    longitude: center.longitude - ctrl.defaultRadius
+                    latitude: center.latitude - $scope.defaultRadius,
+                    longitude: center.longitude - $scope.defaultRadius
                 },
                 northeast: {
-                    latitude: center.latitude + ctrl.defaultRadius,
-                    longitude: center.longitude + ctrl.defaultRadius
+                    latitude: center.latitude + $scope.defaultRadius,
+                    longitude: center.longitude + $scope.defaultRadius
                 }
             },
             function (success) {
-                $timeout(function () {
                     uiGmapIsReady.promise().then(function () {
                         var temp = angular.fromJson(success);
+                        console.log(temp);
                         if($scope.cat.selected !== undefined) {
                             // Filtering
                             $scope.markers = temp.filter(function (e) {
@@ -49,14 +55,17 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                             });
                         }
                     });
-                }, 0);
             },
             function (error) {
                 console.error('Keine Markers gefunden');
             });
     };
 
-    ctrl.createMap = function (center, markers) {
+    /**
+     * Creates a map object with a center
+     * @param center Json Object containing latitude and longitude
+     */
+    $scope.createMap = function (center) {
         $scope.map = {
             center: {
                 latitude: center.latitude,
@@ -72,28 +81,38 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             },
             markerEvents: {
                 goTo: function (id) {
-                    ctrl.goTo(id);
+                    $scope.goTo(id);
                 }
             },
             events: {
                 dragend: function (mapModel, eventName, originalEventArgs) {
-                    ctrl.mapDragend(mapModel, eventName, originalEventArgs);
+                    $scope.mapDragend(mapModel, eventName, originalEventArgs);
                 }
             }
         };
     };
 
-    ctrl.mapDragend = function (mapModel, eventName, originalEventArgs) {
+    /**
+     * Maps dragend event. Calls createMarkers on a dragend event to get the markers on the new position/center
+     * 
+     * @param mapModel Google Maps Object
+     * @param eventName
+     * @param originalEventArgs
+     */
+    $scope.mapDragend = function (mapModel, eventName, originalEventArgs) {
         var lat = mapModel.center.lat(), lng = mapModel.center.lng();
-        ctrl.movedMapCenter = {moved: true, latitude: lat, longitude: lng};
+        $scope.movedMapCenter = {moved: true, latitude: lat, longitude: lng};
 
-        ctrl.createMarkers({
+        $scope.createMarkers({
             latitude: lat,
             longitude: lng
         });
     };
 
-    ctrl.getCategoryList = function () {
+    /**
+     * Gets all categories
+     */
+    $scope.getCategoryList = function () {
         apiService.getCategories(
             function (success) {
                 $scope.categories = angular.fromJson(success);
@@ -104,6 +123,10 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         );
     };
 
+    /**
+     * Markers click event. Opens the window of the marker.
+     * @param marker Google Maps Marker Object
+     */
     $scope.markerClick = function (marker) {
         if(marker.show) {
             marker.show = false;
@@ -115,32 +138,36 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         }
     };
 
+    /**
+     * Marker close event. Closes the window of the marker.
+     * @param marker Google Maps Marker Object
+     */
     $scope.markerClose = function (marker) {
         marker.show = false;
     };
 
-    // Function Calls
-    ctrl.getCategoryList();
+    // FUNCTION CALLS
+    $scope.getCategoryList();
 
     $scope.$watch('cat.selected', function () {
         // Listener for markers filter
-        if (ctrl.movedMapCenter.moved) {
+        if ($scope.movedMapCenter.moved) {
             var center = {
-                latitude: ctrl.movedMapCenter.latitude,
-                longitude: ctrl.movedMapCenter.longitude
+                latitude: $scope.movedMapCenter.latitude,
+                longitude: $scope.movedMapCenter.longitude
             };
-            ctrl.createMarkers(center);
+            $scope.createMarkers(center);
         } else {
             actionService.getCurrentPosition().then(
                 function (data) {
                     // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
-                    ctrl.currentUser.latitude = data.coords.latitude;
-                    ctrl.currentUser.longitude = data.coords.longitude;
+                    $scope.currentUser.latitude = data.coords.latitude;
+                    $scope.currentUser.longitude = data.coords.longitude;
                     var center = {
                         latitude: data.coords.latitude,
                         longitude: data.coords.longitude
                     };
-                    ctrl.createMarkers(center);
+                    $scope.createMarkers(center);
                 },
                 function (data) {
                 }
@@ -152,23 +179,24 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         actionService.getCurrentPosition().then(
             function (data) {
                 // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
-                ctrl.currentUser.latitude = data.coords.latitude;
-                ctrl.currentUser.longitude = data.coords.longitude;
+                $scope.currentUser.latitude = data.coords.latitude;
+                $scope.currentUser.longitude = data.coords.longitude;
                 var center = {
                     latitude: data.coords.latitude,
                     longitude: data.coords.longitude
                 };
-                ctrl.createMap(center, ctrl.createMarkers(center));
+                $scope.createMarkers(center);
+                $scope.createMap(center);
             },
             function (data) {
                 // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
                 // Default Center and TODO: Show Error Message
-                console.log(data);
                 var center = {
                     latitude: 47,
                     longitude: 8
                 };
-                ctrl.createMap(center, ctrl.createMarkers(center));
+                $scope.createMarkers(center);
+                $scope.createMap(center);
             }
         );
     });

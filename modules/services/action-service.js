@@ -1,13 +1,18 @@
 angular.module('app').service('actionService',['jwtHelper','$q','$window', function(jwtHelper, $q, $window) {
 
     'use strict';
+    
+    // VARIABLES
+    var service = this;
+    
+    // EXTERNAL METHODS
 
     /**
      * Taking the window navigator geolocation and returns the users current position
      *
-     * @returns {*|promise} Expects to be called with .then(successfkt, errorfkt)
+     * @returns {*|promise} Expects to be called with .then(successfunc, errorfunc)
      */
-    this.getCurrentPosition = function () {
+    service.getCurrentPosition = function () {
         var deferred = $q.defer();
 
         if (!$window.navigator.geolocation) {
@@ -27,16 +32,23 @@ angular.module('app').service('actionService',['jwtHelper','$q','$window', funct
 
     /**
      * Takes the token and checks for expiration date.
+     * The check is as follows:
+     * If a value is false then continue check else return !true === false
      *
      * @param token String containing base64 payload
      * @returns {boolean} Check for undefined, null and expiration date
      */
-    this.checkLoginState = function (token) {
-        // If a value is false then continue check else return !true === false
+    service.checkLoginState = function (token) {
         return !(token === 'undefined' || token === null || jwtHelper.isTokenExpired(token));
     };
 
-    this.getCurrentId = function (token) {
+    /**
+     * Asks for the current id of a user by checking sub in token payload.
+     * 
+     * @param token String containing base64 payload
+     * @returns {boolean|*|parsers.sub} return the json objects element sub (contains users id)
+     */
+    service.getCurrentId = function (token) {
         var tok = jwtHelper.decodeToken(token);
         console.log(tok);
         return tok.sub;

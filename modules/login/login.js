@@ -1,13 +1,19 @@
-angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store, $state, apiService, md5){
+angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http, store,
+                                                       $state, apiService, md5){
     
-    // Variables
+    // VARIABLES
+    var ctrl = this;
     $scope.loginUser = {};
     $scope.registerUser = {};
     $scope.isLogin = ($state.current.name === 'login');
+
+    // SETTINGS, CHECKS
     
-    // Settings, Checks
-    
-    // Function Definitions
+    // FUNCTION DEFINITIONS
+
+    /**
+     * Login a user
+     */
     $scope.login = function() {
         if(Object.keys($scope.loginUser).length === 2) {
             apiService.login(
@@ -26,6 +32,9 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
         }
     };
 
+    /**
+     * Register a new user
+     */
     $scope.register = function() {
         if(Object.keys($scope.registerUser).length === 4) {
             $scope.registerUser.password = md5.createHash($scope.registerUser.password);
@@ -46,6 +55,6 @@ angular.module('app').controller('LoginCtrl', function($rootScope, $scope, $http
         }
     };
 
-    // Function Calls
+    // FUNCTION CALLS
 
 });

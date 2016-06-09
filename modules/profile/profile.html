@@ -2,23 +2,24 @@
     <div class="UserProfile">
         <div class="card hovercard">
             <div class="card-background">
-                <img class="card-bkimg" alt="backgroundPhoto" ng-if="avatar64.base64 != ''" data-ng-src="data:image/{{avatar64.filetype}};base64,{{avatar64.base64}}">
-                <img class="card-bkimg" alt="backgroundPhoto" ng-if="avatar64.base64 == ''" ng-src="{{avatarDefault}}">
+                <img class="card-bkimg" alt="backgroundPhoto" ng-if="user.avatar != 'none'" data-ng-src="data:image/{{user.avatar.filetype}};base64,{{user.avatar.base64}}">
+                <img class="card-bkimg" alt="backgroundPhoto" ng-if="user.avatar == 'none'" src="assets/defaultUser.jpg">
             </div>
             <div class="useravatar">
-                <img alt="userPhoto" ng-if="avatar64.base64 != ''" data-ng-src="data:image/{{avatar64.filetype}};base64,{{avatar64.base64}}">
-                <img alt="userPhoto" ng-if="avatar64.base64 == ''" ng-src="{{avatarDefault}}">
+                <img alt="userPhoto" ng-if="user.avatar != 'none'" data-ng-src="data:image/{{user.avatar.filetype}};base64,{{user.avatar.base64}}">
+                <img alt="userPhoto" ng-if="user.avatar == 'none'" src="assets/defaultUser.jpg">
                 <div class="upload">
                     <i class="glyphicon glyphicon-edit"></i>
-                    <input on-after-validate="changeProfilePicture" type="file" ng-model="avatar64" base-sixty-four-input name="button" maxsize="1000" accept="image/jpg, image/png, image/jpeg">
+                    <input on-after-validate="saveProfilePicture" type="file" ng-model="user.avatar" base-sixty-four-input name="button" maxsize="1000" accept="image/jpg, image/png, image/jpeg">
                 </div>
             </div>
-            <div class="card-info"> <span class="card-title">{{ user.firstname }} {{ user.lastname }}</span>
+            <div class="card-info"><span class="card-title">{{ user.firstname }} {{ user.lastname }}</span>
             </div>
         </div>
         <div class="btn-pref btn-group btn-group-justified btn-group-lg">
             <div class="btn-group">
-                <button type="button" id="address" class="btn" href="#tab1" data-toggle="tab" ng-click="changeTab('address')" ng-class="{btnactive: actualTab == 'address'}">
+                <button type="button" id="address" class="btn" href="#tab1" data-toggle="tab"
+                        ng-click="changeTab('address')" ng-class="{btnactive: actualTab == 'address'}">
                     <span class="glyphicon glyphicon-home glyphicon-grey" aria-hidden="true"></span>
                     <p class="tabTitle">Adresse</p>
                 </button>
@@ -43,7 +44,8 @@
                     <form class="form-inline" id="addressForm">
                         <div class="form-group">
                             <label id="firstname" for="exampleInputFirstName">Vorname</label>
-                            <input type="text" class="form-control" id="exampleInputFirstName" ng-model="user.firstname">
+                            <input type="text" class="form-control" id="exampleInputFirstName"
+                                   ng-model="user.firstname">
                         </div>
                         <div class="form-group">
                             <label id="name" for="exampleInputName">Nachname</label>
@@ -56,22 +58,37 @@
                         </div>
                         <div class="form-group">
                             <label id="houseNumber" for="exampleInputStreet">Hausnummer</label>
-                            <input type="text" class="form-control" id="exampleInputHouseNumber" ng-model="user.streetNr">
+                            <input type="text" class="form-control" id="exampleInputHouseNumber"
+                                   ng-model="user.streetNr">
                         </div>
                         <br>
                         <div class="form-group">
                             <label id="postcode" for="exampleInputPostcode">Postleitzahl</label>
-                            <input type="text" class="form-control" id="exampleInputPostcode" ng-model="user.postalCode">
+                            <input type="text" class="form-control" id="exampleInputPostcode"
+                                   ng-model="user.postalCode">
                         </div>
                         <div class="form-group">
                             <label id="city" for="exampleInputCity">Ort</label>
                             <input type="text" class="form-control" id="exampleInputCity" ng-model="user.place">
                         </div>
                     </form>
-                    <button class="btn btn-block btn-success" type = "button" ng-click="save()">Speichern</button>
+                    <section class="mapInProfile container">
+                        <ui-gmap-google-map events="map.events"
+                                            center="map.center"
+                                            zoom="map.zoom"
+                                            options="map.options"
+                                            control="map.control">
+
+                            <ui-gmap-marker ng-repeat="marker in markers"
+                                            coords="marker.coords"
+                                            idKey="marker.id">
+                            </ui-gmap-marker>
+                        </ui-gmap-google-map>
+                    </section>
+                    <button class="btn btn-block btn-success" type="button" ng-click="save()">Speichern</button>
                 </div><!-- end tab1 -->
                 <div class="tab-pane fade in" id="tab2">
-                    <h3>Meine Nachhilfe</h3> <!--TODO Nachhilfe sichtbar (oder nicht)-->
+                    <h3>Meine Nachhilfe</h3>
                     <table class="table">
                         <thead ng-if="(user.lessons.length + newLessons.length)">
                         <th>Sichtbarkeit</th>
@@ -87,7 +104,8 @@
                                        ng-false-value="'0'">
                             </td>
                             <td class="col col-xs-1">
-                                <button class="btn btn-danger" ng-click="deleteOldLesson($index)"><i class="glyphicon glyphicon-trash glyphicon-light"></i></button>
+                                <button class="btn btn-danger" ng-click="deleteOldLesson($index)"><i
+                                        class="glyphicon glyphicon-trash glyphicon-light"></i></button>
                             </td>
                             <td class="col col-md-10">{{lesson.categoryName}}</td>
                         </tr>
@@ -99,7 +117,8 @@
                                        ng-false-value="'0'">
                             </td>
                             <td class="col col-xs-1">
-                                <button class="btn btn-danger" ng-click="deleteNewLesson($index)"><i class="glyphicon glyphicon-trash glyphicon-light"></i></button>
+                                <button class="btn btn-danger" ng-click="deleteNewLesson($index)"><i
+                                        class="glyphicon glyphicon-trash glyphicon-light"></i></button>
                             </td>
                             <td class="col col-md-10">
                                 <select class="form-control"
@@ -110,9 +129,11 @@
                         </tr>
                         </tbody>
                     </table>
-                    <button ng-if="categories.length != (user.lessons.length + newLessons.length)" ng-click="addLesson()"
-                            class="btn btn-block btn-success">Füge eine neue Nachhilfe hinzu</button>
-                    <button class="btn btn-block btn-success" type = "button" ng-click="save()">Speichern</button>
+                    <button ng-if="categories.length != (user.lessons.length + newLessons.length)"
+                            ng-click="addLesson()"
+                            class="btn btn-block btn-success">Füge eine neue Nachhilfe hinzu
+                    </button>
+                    <button class="btn btn-block btn-success" type="button" ng-click="save()">Speichern</button>
                 </div>
             </div>
         </div>
