@@ -23,7 +23,6 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, $st
         });
         apiService.getAvatar($stateParams.id,
         function (success) {
-            console.log(success);
             $scope.user.avatar = angular.fromJson(success);
         },
         function (error) {

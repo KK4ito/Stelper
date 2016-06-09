@@ -1,15 +1,19 @@
 angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService,
-                                                          actionService, $rootScope, uiGmapGoogleMapApi, uiGmapIsReady) {
+                                                          actionService, $rootScope, uiGmapGoogleMapApi, uiGmapIsReady,
+                                                          $timeout) {
     // VARIABLES
     var ctrl = this;
     $scope.map = {};
-    $scope.marker = {};
+    $scope.marker = [];
     $scope.newLessons = [];
     $scope.categories = [];
     $scope.actualTab = 'address';
     $scope.user = {name: '', userId: actionService.getCurrentId(store.get('token')), avatar: 'none'};
 
     // SETTINGS, CHECKS
+    if (store.get('token') === null) {
+        $state.go('login');
+    }
     if (!actionService.checkLoginState(store.get('token'))) {
         $state.go('login');
     }
@@ -45,18 +49,16 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
                         latitude: 47,
                         longitude: 8
                     };
-                    $scope.createMap(center, $scope.createMarker(center));
+                    $scope.createMap(center, $scope.createMarker(center, false));
                 } else {
                     center = {
                         latitude: $scope.user.latitude,
                         longitude: $scope.user.longitude
                     };
-                    console.log(center);
-                    $scope.createMap(center, $scope.createMarker(center));
+                    $scope.createMap(center, $scope.createMarker(center, false));
                 }
             },
             function (error) {
-                console.log(error);
             });
         apiService.getAvatar($scope.user.userId,
             function (success) {
@@ -81,10 +83,8 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     $scope.saveProfilePicture = function () {
         apiService.uploadAvatar($scope.user.userId, $scope.user.avatar,
             function (success) {
-                console.log("Success");
             },
             function (error) {
-                console.log("Error");
             });
     };
 
@@ -122,14 +122,10 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
             function (success, status) {
                 var data = angular.fromJson(success);
                 $rootScope.$broadcast('addAlert', {type: 'success', msg: 'Daten wurden erfolgreich gespeichert'});
-                console.log('success!');
-                console.log(success);
             },
             function (error, status) {
                 var data = angular.fromJson(error);
                 $rootScope.$broadcast('addAlert', {type: 'danger', msg: 'Daten konnten nicht gespeichert werden'});
-                console.log('error!');
-                console.log(error);
             });
 
         for (var i = 0; i < $scope.newLessons.length; i++) {
@@ -147,15 +143,17 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
      * Creates a marker on a given position
      *
      * @param position Json Object containing latitude and longitude
+     * @param fromEvent Boolean if coming from an event
      */
-    $scope.createMarker = function (position) {
+    $scope.createMarker = function (position, fromEvent) {
         uiGmapIsReady.promise().then(function () {
-            if ($scope.user.latitude === 0 && $scope.user.longitude === 0) {
-                $scope.marker.coords = position;
-                $scope.marker.id = 0;
+            $scope.marker[0] = {};
+            if (fromEvent || $scope.user.latitude === 0 && $scope.user.longitude === 0) {
+                $scope.marker[0].coords = position;
+                $scope.marker[0].id = 0;
             } else {
-                $scope.marker.coords = {longitude: $scope.user.longitude, latitude: $scope.user.latitude};
-                $scope.marker.id = 0;
+                $scope.marker[0].coords = {longitude: $scope.user.longitude, latitude: $scope.user.latitude};
+                $scope.marker[0].id = 0;
             }
         });
     };
@@ -171,14 +169,13 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
                 longitude: center.longitude
             },
             zoom: 15,
-            marker: $scope.marker,
+            markers: $scope.marker,
             options: {
                 scrollwheel: false
             },
             controls: {},
             events: {
                 click: function (mapModel, eventName, originalEventArgs) {
-                    console.log('tata');
                     $scope.mapClick(mapModel, eventName, originalEventArgs);
 
                 }
@@ -194,19 +191,46 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
      * @param originalEventArgs
      */
     $scope.mapClick = function (mapModel, eventName, originalEventArgs) {
-        var lat = mapModel.center.lat(), lng = mapModel.center.lng();
+        var lat = originalEventArgs[0].latLng.lat(), lng = originalEventArgs[0].latLng.lng();
+
+        $scope.user.latitude = lat;
+        $scope.user.longitude = lng;
 
         $scope.createMarker({
             latitude: lat,
             longitude: lng
-        });
+        }, true);
+    };
+
+    /**
+     * listener function called on change from the 4 address fields and adjusting the user object
+     */
+    $scope.onChangeAddress = function () {
+        $timeout(function () {
+            actionService.getPositionByAddress(
+                'Switzerland,' +
+                $scope.user.postalCode + ' ' +
+                $scope.user.place + ', ' +
+                $scope.user.streetName + ' ' +
+                $scope.user.streetNr,
+                function (success){
+                    var position = {
+                        latitude: success.results[0].geometry.location.lat,
+                        longitude: success.results[0].geometry.location.lng
+                    };
+
+                    $scope.user.latitude = position.latitude;
+                    $scope.user.longitude = position.longitude;
+
+                    $scope.createMap(position);
+                    $scope.createMarker(position, true);
+                });
+        }, 3000);
     };
 
     // FUNCTION CALLS
     $scope.getMyData();
     $scope.getCategoryList();
-    actionService.getPositionByAddress('Steinenbergstrasse', function (success){
-        console.log(success);
-    });
+
 
 });

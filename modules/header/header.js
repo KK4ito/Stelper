@@ -1,27 +1,25 @@
 angular.module('app').controller('HeaderCtrl',function($rootScope, $state, $scope, actionService,
                                                        store, $timeout){
-    // Variables
-    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
+    // VARIABLES
     $scope.alerts = [];
-    
-    // Settings
-    
-    // Function Definitions
-    $rootScope.$on('updateNav', function (event, args) {
-        $scope.loggedIn = actionService.checkLoginState(store.get('token'));
-    });
+    $scope.loggedIn = actionService.checkLoginState(store.get('token'));
 
-    $rootScope.$on('addAlert', function (event, args) {
-        $scope.alerts.push({type: args.type, msg: args.msg});
-        $timeout(function () {
-            $scope.alerts.splice($scope.alerts.length-1, 1);
-        }, 4000);
-    });
+    // SETTINGS, CHECKS
 
+    // FUNCTION DEFINITIONS
+
+    /**
+     * Close alert on the specified index when clicking close icon
+     *
+     * @param index
+     */
     $scope.closeAlert = function (index) {
         $scope.alerts.splice(index, 1);
     };
 
+    /**
+     * Logging the user out when clicking logout icon
+     */
     $scope.logout = function () {
         store.remove('token');
         store.remove('userId');
@@ -29,5 +27,14 @@ angular.module('app').controller('HeaderCtrl',function($rootScope, $state, $scop
         $scope.loggedIn = actionService.checkLoginState(store.get('token'));
     };
 
-    // Function Calls
+    // FUNCTION CALLS
+    $rootScope.$on('updateNav', function (event, args) {
+        $scope.loggedIn = actionService.checkLoginState(store.get('token'));
+    });
+    $rootScope.$on('addAlert', function (event, args) {
+        $scope.alerts.push({type: args.type, msg: args.msg});
+        $timeout(function () {
+            $scope.alerts.splice($scope.alerts.length-1, 1);
+        }, 4000);
+    });
 });

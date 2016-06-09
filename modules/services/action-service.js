@@ -60,7 +60,6 @@ angular.module('app').service('actionService',['jwtHelper','$q','$window', '$htt
      * @param address String address from User 
      * @param success Callback function called when request was successful
      */
-       //TODO: finish this function
     service.getPositionByAddress = function (address, success){
         $http({
             url: 'http://maps.google.com/maps/api/geocode/json?address=' + address,

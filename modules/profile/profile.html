@@ -49,27 +49,38 @@
                         </div>
                         <div class="form-group">
                             <label id="name" for="exampleInputName">Nachname</label>
-                            <input type="text" class="form-control" id="exampleInputName" ng-model="user.lastname">
+                            <input type="text" class="form-control" id="exampleInputName"
+                                   ng-model="user.lastname">
                         </div>
                         <br>
                         <div class="form-group">
                             <label id="street" for="exampleInputStreet">Strasse</label>
-                            <input type="text" class="form-control" id="exampleInputStreet" ng-model="user.streetName">
+                            <input type="text" class="form-control" id="exampleInputStreet"
+                                   ng-model-options="{debounce:3000}"
+                                   ng-change="onChangeAddress()"
+                                   ng-model="user.streetName">
                         </div>
                         <div class="form-group">
                             <label id="houseNumber" for="exampleInputStreet">Hausnummer</label>
                             <input type="text" class="form-control" id="exampleInputHouseNumber"
+                                   ng-model-options="{debounce:3000}"
+                                   ng-change="onChangeAddress()"
                                    ng-model="user.streetNr">
                         </div>
                         <br>
                         <div class="form-group">
                             <label id="postcode" for="exampleInputPostcode">Postleitzahl</label>
                             <input type="text" class="form-control" id="exampleInputPostcode"
+                                   ng-model-options="{debounce:3000}"
+                                   ng-change="onChangeAddress()"
                                    ng-model="user.postalCode">
                         </div>
                         <div class="form-group">
                             <label id="city" for="exampleInputCity">Ort</label>
-                            <input type="text" class="form-control" id="exampleInputCity" ng-model="user.place">
+                            <input type="text" class="form-control" id="exampleInputCity"
+                                   ng-model-options="{debounce:3000}"
+                                   ng-change="onChangeAddress()"
+                                   ng-model="user.place">
                         </div>
                     </form>
                     <section class="mapInProfile container">
@@ -79,9 +90,7 @@
                                             options="map.options"
                                             control="map.control">
 
-                            <ui-gmap-marker ng-repeat="marker in markers"
-                                            coords="marker.coords"
-                                            idKey="marker.id">
+                            <ui-gmap-marker ng-repeat="mark in marker" coords="mark.coords" idKey="mark.id">
                             </ui-gmap-marker>
                         </ui-gmap-google-map>
                     </section>

@@ -252,7 +252,7 @@ function addUpdatePicture($request, $response, $arguments) {
     $data = $request->getBody() ?: $request->getParams();
     $userId = $arguments["id"];
 
-    $fileName = "./pic" . $userId . ".txt";
+    $fileName = "./pictures/pic" . $userId . ".txt";
 
     // open or create if not exists in write mode only -> deleting already existing files with same name
 
@@ -274,13 +274,15 @@ function addUpdatePicture($request, $response, $arguments) {
 function getPicture($request, $response, $arguments) {
     $userId = $arguments["id"];
 
-    $fileName = "./pic" . $userId . ".txt";
-    $myFile = fopen($fileName, "r") or die("Unable to open file!");
-    $data = fread($myFile,filesize($fileName));
-    fclose($myFile);
-
-    return respond($response, 200, "", $data);
-
+    $fileName = "./pictures/pic" . $userId . ".txt";
+    if (file_exists($fileName)) {
+        $myFile = fopen($fileName, "r");
+        $data = fread($myFile,filesize($fileName));
+        fclose($myFile);
+        return respond($response, 200, "", $data);
+    } else {
+        return respond($response, 404, "", (object)array());
+    }
 }
 
 function updatePassword($request, $response, $arguments) {

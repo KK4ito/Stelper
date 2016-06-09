@@ -148,7 +148,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
 
     // FUNCTION CALLS
     $scope.getCategoryList();
-
     $scope.$watch('cat.selected', function () {
         // Listener for markers filter
         if ($scope.movedMapCenter.moved) {
@@ -174,7 +173,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             );
         }
     });
-
     angular.element(document).ready(function () {
         actionService.getCurrentPosition().then(
             function (data) {
