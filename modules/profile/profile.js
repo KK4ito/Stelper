@@ -46,6 +46,7 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
 
     $scope.changeProfilePicture = function () {
         // Todo: send to server
+        // send stringyfied image with key "picture" in a json object
     };
 
     $scope.addLesson = function () {

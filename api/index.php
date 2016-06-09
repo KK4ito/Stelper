@@ -124,11 +124,11 @@ function getUsers($request, $response, $arguments) {
             // use sqlUsers statement without filter
             $query = $pdoUsers->prepare($sqlUsers);
         } else {
-            return respond($response, 400, "all parameters in arguments must be set", (object)array()); }
+            return respondWith($response, 400, new stdClass(), "all parameters in arguments must be set"); }
     }
 
     // Got all users but no lessons
-    if(!$query->execute()) { return respond($response, 400, "failed to fetch all users", (object)array()); }
+    if(!$query->execute()) { return respondWith($response, 400, new stdClass(), "failed to fetch all users"); }
 
     $data = $query->fetchAll();
 
@@ -145,14 +145,14 @@ function getUsers($request, $response, $arguments) {
         $query->bindParam(":userId", $userId);
 
         if (!$query->execute()) {
-            return respond($response, 400, "failed to fetch lessons for user with id: ".$userId, (object)array()); }
+            return respondWith($response, 400, new stdClass(), "failed to fetch lessons for user with id: ".$userId); }
 
         $lessons = $query->fetchAll();
         $user["lessons"] = $lessons;
         $data[$key] = $user; // assign changes user to old key in $result
     }
 
-    return respond($response, 200, "", $data);
+    return respondWith($response, 200, $data);
 }
 
 function getUser($request, $response, $arguments) {
@@ -164,7 +164,7 @@ function getUser($request, $response, $arguments) {
     $query->bindParam(":userId", $userId);
 
     if(!$query->execute()) {
-        return respond($response, 400, "failed to fetch user with id: ".$userId);
+        return respondWith($response, 400, new stdClass(), "failed to fetch user with id: ".$userId);
     }
 
     // Get all user but no lessons
@@ -179,7 +179,7 @@ function getUser($request, $response, $arguments) {
     $query->bindParam(":userId", $userId);
 
     if (!$query->execute()) {
-        return respond($response, 400, "failed to fetch lessons for userId: ".$userId);
+        return respondWith($response, 400, new stdClass(), "failed to fetch lessons for userId: ".$userId);
     }
 
     // Get all lessons of a user
@@ -187,15 +187,16 @@ function getUser($request, $response, $arguments) {
     // store all lessons into a new key
     $data["lessons"] = $lessons;
 
-    return respond($response, 200, "", $data);
+    return respondWith($response, 200, $data);
 }
 
 function deleteUser($request, $response, $arguments) {
     $userId = $arguments["id"];
+    $data = json_decode($request->getBody(), true);
 
     //$data = json_decode($request->getBody() ) ?: $request->getParams();
 
-    if(checkPassword($request, $response, $arguments)) {
+    if(checkPassword($userId, $data->oldPassword)) {
         $pdoMySql = getConnection();
 
         $sql = "DELETE FROM `users` WHERE `users`.`userId` = :userId";
@@ -204,19 +205,19 @@ function deleteUser($request, $response, $arguments) {
         $query->bindParam(":userId", $userId);
 
         if (!$query->execute()) {
-            return respond($response, 400, "failed to delete the user with id".$userId, (object)array());
+            return respondWith($response, 400, new stdClass(), "failed to delete the user with id".$userId);
         }
     } else {
-        return respond($response, 400, "password unvalid", (object)array());
+        return respondWith($response, 400, new stdClass(), "password unvalid");
     }
 
-    return respond($response, 201, "user ".$userId." has been deleted", (object)array());
+    return respondWith($response, 201, new stdClass(), "user ".$userId." has been deleted");
 }
 
 function login($request, $response, $arguments) {
     $data = generateToken($request);
 
-    return respond($response, $data['code'], "", $data);
+    return respondWith($response, $data['code'], $data);
 }
 
 function registerUser($request, $response, $arguments) {
@@ -233,7 +234,7 @@ function registerUser($request, $response, $arguments) {
     $query->bindParam(":password", htmlspecialchars($data["password"]));
 
     if(!$query->execute()) {
-        return respond($response, 400, "failed to register new user", $query->errorInfo());
+        return respondWith($response, 400, $query->errorInfo(), "failed to register new user");
     } else {
         $gen = generateToken($request);
         $lastInsertId = $pdomysql->lastInsertId();
@@ -243,21 +244,41 @@ function registerUser($request, $response, $arguments) {
         $data["status"] = $gen["status"];
     }
 
-    return respond($response, $status, "", $data);
+    return respondWith($response, $status, $data);
 }
 
 function addUpdatePicture($request, $response, $arguments) {
+    $data = json_decode($request->getBody() ) ?: $request->getParams();
+    $stringyfiedPicture = $data->picture;
+    $userId = $arguments["id"];
 
+    $fileName = "./pic" . $userId . ".txt";
+
+    // open or create if not exists in write mode only -> deleting already existing files with same name
+
+    if(!($image = fopen($fileName, "wb")) ) {
+        return respondWith($response, 400, new stdClass(), "unable to open file");
+    }
+
+    // write data
+    if(!(@fwrite($image, $stringyfiedPicture))) {
+        return respondWith($response, 400, new stdClass(), "unable to write file");
+    }
+
+    // close file
+    fclose($image);
+
+    return respondWith($response, 201, new stdClass(), "picture saved");
 }
 
 function updatePassword($request, $response, $arguments) {
     $userId = $arguments["id"];
-    $data = json_decode($request->getBody());
+    $data = json_decode($request->getBody(), true);
     $newPassword = $data->newPassword;
 
     $pdoMySql = getConnection();
 
-    if (checkPassword($request, $response, $arguments)) {
+    if (checkPassword($userId, $data->oldPassword)) {
         $sqlNewPw = "UPDATE `users`
                     SET password=:newPassword
                         WHERE `users`.`userId` = :userId";
@@ -266,14 +287,14 @@ function updatePassword($request, $response, $arguments) {
         $query->bindParam(":newPassword", $newPassword);
 
         if (!$query->execute()) {
-            return respond($response, 400, "failed to change password", (object)array()); }
+            return respondWith($response, 400, new stdClass(), "failed to change password"); }
     } else {
-        return respond($response, 400, "password invalid", (object)array());
+        return respondWith($response, 400, new stdClass(), "password invalid");
     }
 
     $data = $userId;
 
-    return respond($response, 200, "", $data);
+    return respondWith($response, 200, $data);
 }
 
 function updateUser($request, $response, $arguments) {
@@ -315,7 +336,7 @@ function updateUser($request, $response, $arguments) {
     $query->bindParam(":longitude", $longitude);
 
     if (!$query->execute()) {
-        return respond($response, 400, "failed to update user 1", $query->errorInfo());
+        return respondWith($response, 400, $query->errorInfo(), "failed to update user 1");
     }
 
     // delete lessons from user before adding the new lessons
@@ -324,7 +345,7 @@ function updateUser($request, $response, $arguments) {
     $query->bindParam(":userId", $userId);
 
     if (!$query->execute()) {
-        return respond($response, 400, "failed to update user 2", $query->errorInfo());
+        return respondWith($response, 400, $query->errorInfo(), "failed to update user 2");
     }
 
     // add new lessons from user
@@ -338,55 +359,37 @@ function updateUser($request, $response, $arguments) {
         $query->bindParam(":categoryId", $lesson->categoryId);
         $query->bindParam(":visible", $lesson->visible);
         if (!$query->execute()) {
-            return respond($response, 400, "failed to update user 3", $query->errorInfo());
+            return respondWith($response, 400, $query->errorInfo(), "failed to update user 3");
         }
     }
 
-    return respond($response, 200, "", (object)array());
+    return respondWith($response, 200, new stdClass());
 }
 
 //-------------------------------------------------//
 // Helper Functions
 //-------------------------------------------------//
-function respond($response, $status, $message, $data) {
+function respondWith($response, $status, $data, $message="") {
     return $response->withStatus($status)
         ->withHeader('Content-Type', 'application/json')
-        ->write(jsonifyWithMessage($message, $data));
+        ->write(jsonifyWithMessage($data, $message));
 }
 
-function jsonifyWithMessage($message, $data) {
-    $data->message=$message;
+function jsonifyWithMessage($data, $message="") {
+    //TODO Does it always work like this? -> might cause error so test it
+    $data["message"]=$message;
     return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 }
 
-function checkPassword($request, $response, $arguments) {
-    $userId = $arguments["id"];
-
-    $data = json_decode($request->getBody() ) ?: $request->getParams();
-
-    $oldPassword = $data->password;
-
+function checkPassword($userId, $password) {
     $pdoMySql = getConnection();
-
-    $sqlOldPw = "SELECT `password` AS pwValid FROM `users`
+    $sqlPw = "SELECT `password` AS pwValid FROM `users`
                     WHERE `users`.`userId` = :userId
-                    AND `users`.`password` = :oldPassword";
+                    AND `users`.`password` = :password";
+    $query = $pdoMySql->prepare($sqlPw);
+    $query->execute(array("userId"=>$userId, "password"=>$password));
 
-    $query = $pdoMySql->prepare($sqlOldPw);
-    $query->bindParam(":userId", $userId);
-    $query->bindParam(":oldPassword", $oldPassword);
-
-    if(!$query->execute()) {
-        return false;
-    }
-
-    $pwValid = $query->rowCount();
-
-    if ($pwValid===0) {
-        return false;
-    }
-
-    return true;
+    return ($query->rowCount()>0);
 }
 
 function getConnection() {
