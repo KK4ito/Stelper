@@ -147,16 +147,14 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
      * @param fromEvent Boolean if coming from an event
      */
     $scope.createMarker = function (position, fromEvent) {
-        uiGmapIsReady.promise().then(function () {
-            $scope.marker[0] = {};
-            if (fromEvent || $scope.user.latitude === 0 && $scope.user.longitude === 0) {
-                $scope.marker[0].coords = position;
-                $scope.marker[0].id = 0;
-            } else {
-                $scope.marker[0].coords = {longitude: $scope.user.longitude, latitude: $scope.user.latitude};
-                $scope.marker[0].id = 0;
-            }
-        });
+        $scope.marker[0] = {};
+        if (fromEvent || $scope.user.latitude === 0 && $scope.user.longitude === 0) {
+            $scope.marker[0].coords = position;
+            $scope.marker[0].id = 0;
+        } else {
+            $scope.marker[0].coords = {longitude: $scope.user.longitude, latitude: $scope.user.latitude};
+            $scope.marker[0].id = 0;
+        }
     };
 
     /**
@@ -172,7 +170,8 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
             zoom: 15,
             markers: $scope.marker,
             options: {
-                scrollwheel: false
+                scrollwheel: false,
+                disableDefaultUI: true
             },
             controls: {},
             events: {
