@@ -209,7 +209,7 @@ function deleteUser($request, $response, $arguments) {
             return respondWith($response, 400, new stdClass(), "failed to delete the user with id".$userId);
         }
 
-        if (file_exists(fileName)) {
+        if (file_exists($fileName)) {
             if (is_writeable($fileName)) {
                 if (!unlink($fileName)) {
                     return respondWith($response, 400, new stdClass(), "Could not delete profile picture");
@@ -280,7 +280,7 @@ function addUpdatePicture($request, $response, $arguments) {
     // close file
     fclose($image);
 
-    return respond($response, 201, "picture saved", (object)array());
+    return respondWith($response, 201, (object)array(), "picture saved");
 }
 
 function getPicture($request, $response, $arguments) {
@@ -291,9 +291,9 @@ function getPicture($request, $response, $arguments) {
         $myFile = fopen($fileName, "r");
         $data = fread($myFile,filesize($fileName));
         fclose($myFile);
-        return respond($response, 200, "", $data);
+        return respondWith($response, 200, $data, "");
     } else {
-        return respond($response, 404, "", (object)array());
+        return respondWith($response, 404, new stdClass(), "");
     }
 }
 

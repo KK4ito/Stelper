@@ -18,7 +18,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
 
     /**
      * Gets all markers in a given radius
-     * 
+     *
      * @param center Json Object position of the center of the map containing latitude and longitude
      */
     $scope.createMarkers = function (center) {
@@ -98,7 +98,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
 
     /**
      * Maps dragend event. Calls createMarkers on a dragend event to get the markers on the new position/center
-     * 
+     *
      * @param mapModel Google Maps Object
      * @param eventName
      * @param originalEventArgs
