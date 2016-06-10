@@ -67,7 +67,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
      * @param center Json Object containing latitude and longitude
      */
     $scope.createMap = function (center) {
-        console.log(center);
         $scope.map = {
             center: {
                 latitude: center.latitude,
@@ -93,8 +92,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             }
         };
         uiGmapGoogleMapApi.then(function(maps) {
-            console.log('Google Maps loaded');
-            $scope.maploaded = true;
+            $scope.mapLoaded = true;
         });
     };
 

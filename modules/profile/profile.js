@@ -5,6 +5,7 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     var ctrl = this;
     $scope.map = {};
     $scope.marker = [];
+    $scope.mapLoaded = false;
     $scope.newLessons = [];
     $scope.categories = [];
     $scope.actualTab = 'address';
@@ -181,6 +182,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
                 }
             }
         };
+        uiGmapGoogleMapApi.then(function(maps) {
+            $scope.mapLoaded = true;
+        });
     };
 
     /**
