@@ -5,6 +5,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     $scope.map = {};
     $scope.markers = [];
     $scope.categories = [];
+    $scope.maploaded = false;
     $scope.currentUser = {};
     $scope.defaultRadius = 0.3;
     $scope.cat = {selected: undefined, categoryName: ''};
@@ -66,6 +67,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
      * @param center Json Object containing latitude and longitude
      */
     $scope.createMap = function (center) {
+        console.log(center);
         $scope.map = {
             center: {
                 latitude: center.latitude,
@@ -90,6 +92,10 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                 }
             }
         };
+        uiGmapGoogleMapApi.then(function(maps) {
+            console.log('Google Maps loaded');
+            $scope.maploaded = true;
+        });
     };
 
     /**
@@ -176,6 +182,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     angular.element(document).ready(function () {
         actionService.getCurrentPosition().then(
             function (data) {
+                console.log(data);
                 // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
                 $scope.currentUser.latitude = data.coords.latitude;
                 $scope.currentUser.longitude = data.coords.longitude;
@@ -183,18 +190,19 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                     latitude: data.coords.latitude,
                     longitude: data.coords.longitude
                 };
+                console.log(center);
                 $scope.createMarkers(center);
                 $scope.createMap(center);
             },
             function (data) {
-                // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
-                // Default Center and TODO: Show Error Message
-                var center = {
-                    latitude: 47,
-                    longitude: 8
-                };
-                $scope.createMarkers(center);
-                $scope.createMap(center);
+                    // data looks like this -> PositionError {code: 1, message: "User denied Geolocation"}
+                    // Default Center and TODO: Show Error Message
+                    var center = {
+                        latitude: 47,
+                        longitude: 8
+                    };
+                    $scope.createMarkers(center);
+                    $scope.createMap(center);
             }
         );
     });

@@ -409,7 +409,7 @@ function respondWith($response, $status, $data, $message="") {
 
 function jsonifyWithMessage($data, $message="") {
     //TODO Does it always work like this? -> might cause error so test it
-    if (!$message="") {
+    if (!($message==="")) {
         $data["message"]=$message;
 
     }

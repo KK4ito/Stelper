@@ -48,7 +48,8 @@
                         center="map.center"
                         zoom="map.zoom"
                         options="map.options"
-                        control="map.control">
+                        control="map.control"
+                        ng-if="maploaded">
 
         <ui-gmap-marker ng-repeat="marker in markers"
                         coords="marker.coords"
@@ -59,9 +60,9 @@
                 show="marker.show"
                 closeClick="markerClose(marker)"
                 ng-cloak="ng-cloak">
-                <table>
-                    <tr>
-                        <td>{{ marker.firstname }} {{ marker.lastname }}</td>
+                            <table>
+                                <tr>
+                                    <td>{{ marker.firstname }} {{ marker.lastname }}</td>
                     </tr>
                     <tr>
                         <td><button class="btn btn-info" ui-sref="overview({id:$parent.marker.id})">
