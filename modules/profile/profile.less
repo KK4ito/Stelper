@@ -205,10 +205,19 @@ button#address, button#privateLessons {
 }
 
 /*form*/
-.form-inline#addressForm {
-  margin: 20px;
-  width: 60%;
-  display: inline-block;
+@media (min-width: 1183px) {
+  .form-inline#addressForm {
+    margin: 20px;
+    width: 60%;
+    display: inline-block;
+  }
+}
+
+@media (max-width: 1182px){
+  .form-inline#addressForm {
+    margin: 20px;
+    width: 100%;
+  }
 }
 
 #addressForm .form-group{
@@ -231,10 +240,22 @@ button#address, button#privateLessons {
   margin-bottom: 80px;
 }
 
-.mapInProfile{
-  display: inline-block;
-  width: 30%;
-  height: 200px;
+@media (min-width: 1183px) {
+  .mapInProfile {
+    display: inline-block;
+    width: 30%;
+    height: 200px;
+  }
 }
 
+@media (max-width: 1182px){
+  .mapInProfile {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+.mapInProfile.container{
+  margin-bottom: 40px;
+}
 
