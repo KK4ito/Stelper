@@ -89,7 +89,7 @@
                                             zoom="map.zoom"
                                             options="map.options"
                                             control="map.control"
-                                            ng-map="maploaded">
+                                            ng-if="mapLoaded" >
 
                             <ui-gmap-marker ng-repeat="mark in marker" coords="mark.coords" idKey="mark.id">
                             </ui-gmap-marker>
