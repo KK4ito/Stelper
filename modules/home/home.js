@@ -67,7 +67,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
      * @param center Json Object containing latitude and longitude
      */
     $scope.createMap = function (center) {
-        console.log(center);
         $scope.map = {
             center: {
                 latitude: center.latitude,
@@ -93,7 +92,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             }
         };
         uiGmapGoogleMapApi.then(function(maps) {
-            console.log('Google Maps loaded');
             $scope.maploaded = true;
         });
     };
@@ -182,7 +180,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     angular.element(document).ready(function () {
         actionService.getCurrentPosition().then(
             function (data) {
-                console.log(data);
                 // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
                 $scope.currentUser.latitude = data.coords.latitude;
                 $scope.currentUser.longitude = data.coords.longitude;
@@ -190,7 +187,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
                     latitude: data.coords.latitude,
                     longitude: data.coords.longitude
                 };
-                console.log(center);
                 $scope.createMarkers(center);
                 $scope.createMap(center);
             },
