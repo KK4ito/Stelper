@@ -195,7 +195,7 @@ function deleteUser($request, $response, $arguments) {
     $userId = $arguments["id"];
     $data = json_decode($request->getBody(), true);
 
-    //$data = json_decode($request->getBody() ) ?: $request->getParams();
+    $fileName = "./pictures/pic" . $userId . ".txt";
 
     if(checkPassword($userId, $data->oldPassword)) {
         $pdoMySql = getConnection();
@@ -207,6 +207,18 @@ function deleteUser($request, $response, $arguments) {
 
         if (!$query->execute()) {
             return respondWith($response, 400, new stdClass(), "failed to delete the user with id".$userId);
+        }
+
+        if (file_exists(fileName)) {
+            if (is_writeable($fileName)) {
+                if (!unlink($fileName)) {
+                    return respondWith($response, 400, new stdClass(), "Could not delete profile picture");
+                }
+            } else {
+                return respondWith($response, 400, new stdClass(), "file " . $fileName . " is not writeable");
+            }
+        } else {
+            return respondWith($response, 400, new stdClass(), "file " . $fileName . " does not exist");
         }
     } else {
         return respondWith($response, 400, new stdClass(), "password unvalid");
@@ -384,14 +396,23 @@ function updateUser($request, $response, $arguments) {
 // Helper Functions
 //-------------------------------------------------//
 function respondWith($response, $status, $data, $message="") {
-    return $response->withStatus($status)
-        ->withHeader('Content-Type', 'application/json')
-        ->write(jsonifyWithMessage($data, $message));
+    if ($status>=400 && $status<500) {
+        return $response->withStatus($status)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(jsonifyWithMessage($data, $message));
+    } else {
+        return $response->withStatus($status)
+            ->withHeader('Content-Type', 'application/json')
+            ->write(jsonifyWithMessage($data));
+    }
 }
 
 function jsonifyWithMessage($data, $message="") {
     //TODO Does it always work like this? -> might cause error so test it
-    $data["message"]=$message;
+    if (!$message="") {
+        $data["message"]=$message;
+
+    }
     return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 }
 
