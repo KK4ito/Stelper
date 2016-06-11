@@ -13,8 +13,8 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, $st
     /**
      * Get the requested users data
      */
-    $scope.getUser = function () {
-        apiService.getUser($stateParams.id,
+    $scope.getUserOverview = function () {
+        apiService.getUserOverview($stateParams.id,
         function (success) {
             $scope.user = angular.fromJson(success);
         },
@@ -31,6 +31,6 @@ angular.module('app').controller('OverviewCtrl',function($scope, apiService, $st
     };
 
     // FUNCTION CALLS
-    $scope.getUser();
+    $scope.getUserOverview();
 
 });

@@ -1,7 +1,10 @@
 angular.module('app').controller('ProfileCtrl', function (store, $state, $scope, apiService,
                                                           actionService, $rootScope, uiGmapGoogleMapApi, uiGmapIsReady,
                                                           $timeout) {
+    // /////////////////////////////////////////////
     // VARIABLES
+    // /////////////////////////////////////////////
+
     var ctrl = this;
     $scope.map = {};
     $scope.marker = [];
@@ -11,7 +14,10 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
     $scope.actualTab = 'address';
     $scope.user = {name: '', userId: actionService.getCurrentId(store.get('token')), avatar: 'none'};
 
+    // /////////////////////////////////////////////
     // SETTINGS, CHECKS
+    // /////////////////////////////////////////////
+
     if (store.get('token') === null) {
         $state.go('login');
     }
@@ -21,7 +27,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
 
     $rootScope.$broadcast('updateNav', {});
 
+    // /////////////////////////////////////////////
     // FUNCTION DEFINITIONS
+    // /////////////////////////////////////////////
 
     /**
      * Gets all categories
@@ -45,7 +53,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
         apiService.getUser($scope.user.userId,
             function (success) {
                 $scope.user = angular.fromJson(success);
+                //setMapCenterLatLng(center);
                 if ($scope.user.latitude === 0 && $scope.user.longitude === 0) {
+
                     center = {
                         latitude: 47,
                         longitude: 8
@@ -119,7 +129,9 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
      * Saves the whole user object
      */
     $scope.save = function () {
-        apiService.updateUser($scope.user.userId, $scope.user,
+        apiService.updateUser(
+            $scope.user.userId,
+            $scope.user,
             function (success, status) {
                 var data = angular.fromJson(success);
                 $rootScope.$broadcast('addAlert', {type: 'success', msg: 'Daten wurden erfolgreich gespeichert'});
@@ -132,6 +144,7 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
         for (var i = 0; i < $scope.newLessons.length; i++) {
             for (var j = 0; j < $scope.categories.length; j++) {
                 if ($scope.categories[j].categoryId === $scope.newLessons[i].categoryId) {
+
                     $scope.newLessons[i].categoryName = $scope.categories[j].categoryName;
                 }
             }
@@ -171,7 +184,7 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
             markers: $scope.marker,
             options: {
                 scrollwheel: false,
-                disableDefaultUI: true
+                disableDefaultUI: false
             },
             controls: {},
             events: {
@@ -216,24 +229,51 @@ angular.module('app').controller('ProfileCtrl', function (store, $state, $scope,
                 $scope.user.place + ', ' +
                 $scope.user.streetName + ' ' +
                 $scope.user.streetNr,
-                function (success){
-                    var position = {
-                        latitude: success.results[0].geometry.location.lat,
-                        longitude: success.results[0].geometry.location.lng
-                    };
-
-                    $scope.user.latitude = position.latitude;
-                    $scope.user.longitude = position.longitude;
-
-                    $scope.createMap(position);
-                    $scope.createMarker(position, true);
-                });
+                function(success) {
+                    successFunction(success);
+                }
+            );
         }, 3000);
     };
 
+    // /////////////////////////////////////////////
+    // private helper methods
+    // /////////////////////////////////////////////
+
+    /*var setMapCenterLatLng = function(center) {
+        if ($scope.user.latitude === 0 && $scope.user.longitude === 0) {
+
+            center = {
+                latitude: 47,
+                longitude: 8
+            };
+            $scope.createMap(center, $scope.createMarker(center, false));
+        } else {
+            center = {
+                latitude: $scope.user.latitude,
+                longitude: $scope.user.longitude
+            };
+            $scope.createMap(center, $scope.createMarker(center, false));
+        }
+    };*/
+
+    var successFunction = function(success) {
+
+        var position = {
+            latitude: success.results[0].geometry.location.lat,
+            longitude: success.results[0].geometry.location.lng
+        };
+
+        $scope.user.latitude = position.latitude;
+        $scope.user.longitude = position.longitude;
+
+        $scope.createMap(position);
+        $scope.createMarker(position, true);
+    };
+
+    // /////////////////////////////////////////////
     // FUNCTION CALLS
+    // /////////////////////////////////////////////
     $scope.getMyData();
     $scope.getCategoryList();
-
-
 });

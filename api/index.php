@@ -18,7 +18,8 @@ header('Access-Control-Allow-Methods: POST, GET, PUT');
 //-------------------------------------------------//
 // Imports
 //-------------------------------------------------//
-use Firebase\JWT\JWT;
+use /** @noinspection PhpUndefinedNamespaceInspection */
+    Firebase\JWT\JWT;
 
 require '../../vendor/autoload.php';
 
@@ -37,10 +38,13 @@ define('DB_PASSWORD', 'stelperinio2');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'stelper');
 
+/** @noinspection PhpUndefinedNamespaceInspection */
 $app = new \Slim\App();
+/** @noinspection PhpUndefinedNamespaceInspection */
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/login", "/register", "/testing", "/users", "/categories"],
+    // TODO: verhindern dass sub routes von /users ebenfalls im passthrough erlaubt sind
+    "passthrough" => ["/login", "/register", "/users/markers", "/categories"],
     "secure" => false,
     "secret" => "supersecretkeyyoushouldnotcommittogithub"
 ]));
@@ -51,15 +55,15 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 $app->post('/login', 'login');
 $app->post('/register', 'registerUser');
 $app->get('/users', 'getUsers');
+$app->get('/users/markers', 'getUsers');
+$app->get('/users/markers/{id}', 'getUserOverview');
 $app->get('/users/{id}', 'getUser');
 $app->get('/categories', 'getCategories');
 $app->get('/users/{id}/picture', 'getPicture');
 $app->put('/users/{id}', 'updateUser');
-$app->delete('/users/{d}', 'deleteUser');
+$app->delete('/users/{id}', 'deleteUser');
 $app->put('/users/{id}/picture', 'addUpdatePicture');
 $app->put('/users/{id}/password', 'updatePassword');
-
-//$app->delete('/users/{id}', 'deleteUser');
 
 $app->run();
 
@@ -120,16 +124,17 @@ function getUsers($request, $response, $arguments) {
     } else {
         if (!(isset($northeastlat) || isset($northeastlng)
             || isset($southwestlat) || isset($southwestlng)
-            || isset($lat) || isset($lng))
-        ) {
+            || isset($lat) || isset($lng))) {
+
             // use sqlUsers statement without filter
             $query = $pdoUsers->prepare($sqlUsers);
         } else {
-            return respondWith($response, 400, new stdClass(), "all parameters in arguments must be set"); }
+
+            return respondWith($response, 400, (object)array(), "all parameters in arguments must be set"); }
     }
 
     // Got all users but no lessons
-    if(!$query->execute()) { return respondWith($response, 400, new stdClass(), "failed to fetch all users"); }
+    if(!$query->execute()) { return respondWith($response, 400, (object)array(), "failed to fetch all users"); }
 
     $data = $query->fetchAll();
 
@@ -146,12 +151,49 @@ function getUsers($request, $response, $arguments) {
         $query->bindParam(":userId", $userId);
 
         if (!$query->execute()) {
-            return respondWith($response, 400, new stdClass(), "failed to fetch lessons for user with id: ".$userId); }
+            return respondWith($response, 400, (object)array(), "failed to fetch lessons for user with id: ".$userId); }
 
         $lessons = $query->fetchAll();
         $user["lessons"] = $lessons;
         $data[$key] = $user; // assign changes user to old key in $result
     }
+
+    return respondWith($response, 200, $data);
+}
+
+function getUserOverview($request, $response, $arguments) {
+    $pdomysql = getConnection();
+
+    $userId = $arguments['id'];
+
+    $query = $pdomysql->prepare("SELECT * FROM `users` WHERE `users`.`userId`=:userId");
+    $query->bindParam(":userId", $userId);
+
+    if(!$query->execute()) {
+        return respondWith($response, 400, new stdClass(), "failed to fetch user with id: ".$userId);
+    }
+
+    // Get all user but no lessons
+    $data = $query->fetch();
+
+    $pdoLessons = getConnection();
+    $query = $pdoLessons->prepare("SELECT `lessonId`, `categories`.`categoryId`, `categoryName`, `visible`
+                                          FROM `lessons`
+                                          LEFT JOIN `categories`
+                                              ON `lessons`.`categoryId` = `categories`.`categoryId`
+                                          WHERE `lessons`.`userId` = :userId
+                                          AND `lessons`.`visible` = 1");
+
+    $query->bindParam(":userId", $userId);
+
+    if (!$query->execute()) {
+        return respondWith($response, 400, new stdClass(), "failed to fetch lessons for userId: ".$userId);
+    }
+
+    // Get all lessons of a user
+    $lessons = $query->fetchAll();
+    // store all lessons into a new key
+    $data["lessons"] = $lessons;
 
     return respondWith($response, 200, $data);
 }
@@ -220,6 +262,7 @@ function deleteUser($request, $response, $arguments) {
         } else {
             return respondWith($response, 400, new stdClass(), "file " . $fileName . " does not exist");
         }
+
     } else {
         return respondWith($response, 400, new stdClass(), "password unvalid");
     }
@@ -280,7 +323,7 @@ function addUpdatePicture($request, $response, $arguments) {
     // close file
     fclose($image);
 
-    return respondWith($response, 201, (object)array(), "picture saved");
+    return respondWith($response, 201, new stdClass());
 }
 
 function getPicture($request, $response, $arguments) {
@@ -291,9 +334,9 @@ function getPicture($request, $response, $arguments) {
         $myFile = fopen($fileName, "r");
         $data = fread($myFile,filesize($fileName));
         fclose($myFile);
-        return respondWith($response, 200, $data, "");
+        return respondWith($response, 200, $data);
     } else {
-        return respondWith($response, 404, new stdClass(), "");
+        return respondWith($response, 404, new stdClass());
     }
 }
 
@@ -407,11 +450,13 @@ function respondWith($response, $status, $data, $message="") {
     }
 }
 
-function jsonifyWithMessage($data, $message="") {
+function jsonifyWithMessage($data, $message=null) {
     //TODO Does it always work like this? -> might cause error so test it
-    if (!($message==="")) {
-        $data["message"]=$message;
-
+    if (!is_array($data) && !($message==null)) {
+        $data->message = $message;
+    }
+    if (is_array($data) && !($message==null)) {
+        $data["message"] = $message;
     }
     return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 }
@@ -429,7 +474,7 @@ function checkPassword($userId, $password) {
 
 function getConnection() {
     try {
-        return new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USERNAME, DB_PASSWORD);
+        return new PDO('mysql:charset=utf8mb4;host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USERNAME, DB_PASSWORD);
     } catch (PDOException $pdoe) {
         echo "Error connecting to MySql: " . $pdoe->getMessage() . ": on line " . $pdoe->getLine() . "<br/>";
         // echo $pdoe->getTraceAsString(); // prints credentials > use with care

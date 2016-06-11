@@ -22,7 +22,8 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
      * @param center Json Object position of the center of the map containing latitude and longitude
      */
     $scope.createMarkers = function (center) {
-        apiService.getMarkers({
+        apiService.getMarkers(
+            {
                 southwest: {
                     latitude: center.latitude - $scope.defaultRadius,
                     longitude: center.longitude - $scope.defaultRadius
@@ -35,26 +36,7 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
             function (success) {
                     uiGmapIsReady.promise().then(function () {
                         var temp = angular.fromJson(success);
-                        console.log(temp);
-                        if($scope.cat.selected !== undefined) {
-                            // Filtering
-                            $scope.markers = temp.filter(function (e) {
-                                e.id = e.userId;
-                                e.coords = {latitude: e.latitude, longitude: e.longitude};
-                                e.show = false;
-                                return e.lessons.some(function (e2) {
-                                    return ($scope.cat.selected.categoryName === e2.categoryName);
-                                });
-                            });
-                        } else {
-                            // Not filtering
-                            $scope.markers = temp.map(function (e) {
-                                e.id = e.userId;
-                                e.coords = {latitude: e.latitude, longitude: e.longitude};
-                                e.show = false;
-                                return e;
-                            });
-                        }
+                        applyFilter(temp);
                     });
             },
             function (error) {
@@ -180,7 +162,6 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
     angular.element(document).ready(function () {
         actionService.getCurrentPosition().then(
             function (data) {
-                console.log(data);
                 // data looks like this -> Geoposition {coords: Coordinates, timestamp: 1462572088941}
                 $scope.currentUser.latitude = data.coords.latitude;
                 $scope.currentUser.longitude = data.coords.longitude;
@@ -205,4 +186,38 @@ angular.module('app').controller('HomeCtrl',function($scope, $state, actionServi
         );
     });
 
+    // /////////////////////////////////////////////
+    // private helper methods
+    // /////////////////////////////////////////////
+
+    var applyFilter = function (temp) {
+        if($scope.cat.selected !== undefined) {
+            // Filtering
+            $scope.markers = temp.filter(
+                function(e) {
+                    e.id = e.userId;
+                    e.coords = {
+                        latitude: e.latitude,
+                        longitude: e.longitude
+                    };
+                    e.show = false;
+                    return e.lessons.some(
+                        function (e2) {
+                            return ($scope.cat.selected.categoryName === e2.categoryName);
+                        }
+                    );
+                }
+            );
+        } else {
+            // Not filtering
+            $scope.markers = temp.map(
+                function(e) {
+                    e.id = e.userId;
+                    e.coords = {latitude: e.latitude, longitude: e.longitude};
+                    e.show = false;
+                    return e;
+                }
+            );
+        }
+    };
 });

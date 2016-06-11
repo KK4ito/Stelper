@@ -72,7 +72,7 @@ angular.module('app').service('apiService',['$http', function($http) {
      */
     service.getUsers = function (filter, success, error) {
         $http.get(
-            BASE_API + '/users',
+            BASE_API + '/users/markers',
             filter
         ).success(success).error(error);
     };
@@ -87,6 +87,19 @@ angular.module('app').service('apiService',['$http', function($http) {
     service.getUser = function (id, success, error) {
         $http.get(
             BASE_API + '/users/' + id
+        ).success(success).error(error);
+    };
+
+    /**
+     * Asks for a specific users information.
+     *
+     * @param id        Takes an Integer value respresenting the users Identification Number
+     * @param success   Callback function called when request was successful
+     * @param error     Callback function called when request was unsucessful
+     */
+    service.getUserOverview = function (id, success, error) {
+        $http.get(
+            BASE_API + '/users/markers/' + id
         ).success(success).error(error);
     };
 
